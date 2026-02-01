@@ -8,7 +8,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-class RelacionesFamiliaresId implements Serializable {
+public class RelacionesFamiliaresId implements Serializable {
     @Column(name = "id_padre")
     private Integer idPadre;
 

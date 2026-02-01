@@ -9,7 +9,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-class ProgresoLeccionesId implements Serializable {
+public class ProgresoLeccionesId implements Serializable {
     @Column(name = "id_usuario")
     private Integer idUsuario;
 
