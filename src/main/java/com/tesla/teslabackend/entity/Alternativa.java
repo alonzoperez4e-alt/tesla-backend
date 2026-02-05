@@ -1,4 +1,5 @@
 package com.tesla.teslabackend.entity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,7 +18,7 @@ public class Alternativa {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_pregunta")
-    @ToString.Exclude
+    @JsonBackReference
     private Pregunta pregunta;
 
     @Column(name = "texto_alternativa", nullable = false, columnDefinition = "TEXT")

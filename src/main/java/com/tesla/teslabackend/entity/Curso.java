@@ -1,5 +1,6 @@
 package com.tesla.teslabackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
@@ -29,5 +30,6 @@ public class Curso {
 
     @OneToMany(mappedBy = "curso", cascade = CascadeType.ALL)
     @ToString.Exclude
+    @JsonManagedReference
     private List<Semana> semanas;
 }

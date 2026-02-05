@@ -1,5 +1,7 @@
 package com.tesla.teslabackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
@@ -19,7 +21,7 @@ public class Leccion {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_semana")
-    @ToString.Exclude
+    @JsonBackReference
     private Semana semana;
 
     @Column(nullable = false, length = 100)
@@ -32,5 +34,6 @@ public class Leccion {
 
     @OneToMany(mappedBy = "leccion", cascade = CascadeType.ALL)
     @ToString.Exclude
+    @JsonManagedReference
     private List<Pregunta> preguntas;
 }
