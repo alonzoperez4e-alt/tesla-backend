@@ -11,25 +11,21 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/estudiantes")
-@CrossOrigin(origins = "*")
+// @CrossOrigin eliminado para evitar conflictos con CorsConfig
 public class EstudianteController {
 
     @Autowired
     private AprendizajeService aprendizajeService;
 
-    // 1. Obtener cursos habilitados(Selector del dashboard)
     @GetMapping("/cursos")
     public ResponseEntity<List<Curso>> listarCursos() {
         return ResponseEntity.ok(aprendizajeService.obtenerCursosDisponibles());
     }
 
-    // 2. Obtener el camino de aprendizaje (Semanas y lecciones)
-    // URL ejemplo: /api/estudiantes/curso/1/camino?usuarioId=5
     @GetMapping("/curso/{cursoId}/camino")
     public ResponseEntity<CaminoCursoDTO> verCaminoCurso(
             @PathVariable Integer cursoId,
             @RequestParam Integer usuarioId) {
-
         return ResponseEntity.ok(aprendizajeService.obtenerCaminoDelCurso(cursoId, usuarioId));
     }
 }
