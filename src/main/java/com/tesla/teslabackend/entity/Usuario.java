@@ -3,7 +3,12 @@ package com.tesla.teslabackend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -12,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Usuario {
+public class Usuario implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,17 +43,34 @@ public class Usuario {
     @Column(length = 50)
     private String area;
 
+    @Column(name = "tipo_alumno", length = 50)
+    private String tipoAlumno;
+
     @CreationTimestamp
     @Column(name = "fecha_registro", updatable = false)
     private LocalDateTime fechaRegistro;
 
-    // Relación con Estadisticas (1 a 1)
-    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
-    private EstadisticasAlumno estadisticas;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + rol.name()));
+    }
 
-    // Relación con Intentos (1 a N)
-    // Excluimos del ToString para evitar bucles infinitos
-    @ToString.Exclude
-    @OneToMany(mappedBy = "usuario")
-    private List<Intento> intentos;
+    @Override
+    public String getUsername() {
+        return codigoUsuario;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+    @Override
+    public boolean isAccountNonLocked() { return true; }
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
+    @Override
+    public boolean isEnabled() { return true; }
 }
