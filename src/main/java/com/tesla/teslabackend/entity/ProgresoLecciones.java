@@ -1,33 +1,63 @@
 package com.tesla.teslabackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
 
-@Entity // Parte 2: La entidad que usa la clave
+@Entity
 @Table(name = "progreso_lecciones")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@IdClass(ProgresoLeccionesId.class)
 public class ProgresoLecciones {
 
-    @EmbeddedId
-    private ProgresoLeccionesId id;
-
+    @Id
     @ManyToOne
-    @MapsId("idUsuario") // Mapea la parte de la clave a la relación
-    @JoinColumn(name = "id_usuario")
+    @JoinColumn(name = "id_usuario", referencedColumnName = "id_usuario") // Asegúrate que en BD sea id_usuario
+    @JsonIgnore
     private Usuario usuario;
 
+    @Id
     @ManyToOne
-    @MapsId("idLeccion")
-    @JoinColumn(name = "id_leccion")
+    @JoinColumn(name = "id_leccion", referencedColumnName = "id_leccion") // Asegúrate que en BD sea id_leccion
+    @JsonIgnore
     private Leccion leccion;
 
-    @Builder.Default
+    @Column(name = "completada")
     private Boolean completada = false;
 
     @Column(name = "progreso_porcentaje")
-    @Builder.Default
     private Integer progresoPorcentaje = 0;
+
+    public ProgresoLecciones() {
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public Leccion getLeccion() {
+        return leccion;
+    }
+
+    public void setLeccion(Leccion leccion) {
+        this.leccion = leccion;
+    }
+
+    public Boolean getCompletada() {
+        return completada;
+    }
+
+    public void setCompletada(Boolean completada) {
+        this.completada = completada;
+    }
+
+    public Integer getProgresoPorcentaje() {
+        return progresoPorcentaje;
+    }
+
+    public void setProgresoPorcentaje(Integer progresoPorcentaje) {
+        this.progresoPorcentaje = progresoPorcentaje;
+    }
 }

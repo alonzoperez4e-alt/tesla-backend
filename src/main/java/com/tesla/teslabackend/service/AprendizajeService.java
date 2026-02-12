@@ -6,9 +6,11 @@ import com.tesla.teslabackend.dto.SemanaDTO;
 import com.tesla.teslabackend.entity.Curso;
 import com.tesla.teslabackend.entity.ProgresoLecciones;
 import com.tesla.teslabackend.entity.Semana;
+import com.tesla.teslabackend.entity.ProgresoLeccionesId;
 import com.tesla.teslabackend.repository.CursoRepository;
 import com.tesla.teslabackend.repository.ProgresoLeccionesRepository;
 import com.tesla.teslabackend.repository.SemanaRepository;
+import com.tesla.teslabackend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,14 +23,10 @@ import java.util.stream.Collectors;
 @Service
 public class AprendizajeService {
 
-    @Autowired
-    private CursoRepository cursoRepository;
-
-    @Autowired
-    private SemanaRepository semanaRepository;
-
-    @Autowired
-    private ProgresoLeccionesRepository progresoRepository;
+    @Autowired private CursoRepository cursoRepository;
+    @Autowired private SemanaRepository semanaRepository;
+    @Autowired private ProgresoLeccionesRepository progresoRepository;
+    @Autowired private UsuarioRepository usuarioRepository; // 1. Inyectamos el repo de usuarios
 
     @Transactional(readOnly = true)
     public List<Curso> obtenerCursosDisponibles() {
@@ -37,32 +35,43 @@ public class AprendizajeService {
 
     @Transactional(readOnly = true)
     public CaminoCursoDTO obtenerCaminoDelCurso(Integer cursoId, Integer usuarioId) {
-        // 1. Validar existencia del curso
-        Curso curso = cursoRepository.findById(cursoId)
-                .orElseThrow(() -> new RuntimeException("Curso no encontrado: " + cursoId));
 
-        // 2. Traer estructura (Semanas + Lecciones) tal cual la definió el Admin
+        // --- DEBUG: Imprimir en consola el ID recibido para verificar ---
+        System.out.println("AprendizajeService: Solicitando camino para Usuario ID: " + usuarioId + " en Curso ID: " + cursoId);
+
+        // 2. VERIFICACIÓN DE SEGURIDAD (Backend)
+        // Aunque React lo valide, nos aseguramos que el ID exista en BD
+        if (!usuarioRepository.existsById(usuarioId)) {
+            throw new RuntimeException("Usuario no encontrado con ID: " + usuarioId);
+        }
+
+        // 3. Validar curso
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("Curso no encontrado"));
+
+        // 4. Traer estructura (Semanas -> Lecciones)
+        // Nota: Asegúrate que este método acepte Long o Integer según tu Repo
         List<Semana> semanasEntity = semanaRepository.findByCursoIdConLecciones(cursoId);
 
-        // 3. Traer el progreso visual del alumno (qué checks pintar)
+        // 5. Traer progreso SOLO DEL USUARIO SOLICITADO
         List<ProgresoLecciones> progresos = progresoRepository.findProgresoPorUsuarioYCurso(usuarioId, cursoId);
 
-        // Mapa para búsqueda rápida: ID Lección -> ¿Está completa?
+        // 6. Mapear: ID Lección -> Completada (true/false)
         Map<Integer, Boolean> mapaCompletadas = progresos.stream()
+                // Asumimos que getLeccion().getId() devuelve Long o Integer compatible
                 .collect(Collectors.toMap(
-                        p -> p.getLeccion().getIdLeccion(),
+                        p -> p.getLeccion().getIdLeccion(), // Si getId devuelve Integer, Java lo maneja
                         ProgresoLecciones::getCompletada,
-                        (existing, replacement) -> existing // En caso raro de duplicados, mantener el primero
+                        (existente, reemplazo) -> existente
                 ));
 
-        // 4. Construir respuesta
+        // 7. Construir DTO final
         List<SemanaDTO> semanasDTO = new ArrayList<>();
 
         for (Semana semana : semanasEntity) {
             List<LeccionDTO> leccionesDTO = new ArrayList<>();
 
             for (var leccion : semana.getLecciones()) {
-                // Verificamos si el alumno completó esta lección específica
                 boolean isCompletada = mapaCompletadas.getOrDefault(leccion.getIdLeccion(), false);
 
                 leccionesDTO.add(new LeccionDTO(
@@ -70,10 +79,11 @@ public class AprendizajeService {
                         leccion.getNombre(),
                         leccion.getOrden(),
                         isCompletada,
-                        0 // Futuro: puntaje obtenido
+                        0 // Aquí iría el puntaje si lo tuvieras en el Progreso
                 ));
             }
-            // El bloqueo depende de la configuración del Admin en BD
+
+            // El bloqueo depende solo del Admin
             boolean isBloqueada = semana.getIsBloqueada() != null && semana.getIsBloqueada();
 
             semanasDTO.add(new SemanaDTO(

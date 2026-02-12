@@ -42,6 +42,8 @@ public class AuthService {
                 .token(jwtService.generateToken(user))
                 .nombre(user.getNombre())
                 .rol(user.getRol().name())
+                .codigo(request.getCodigo())
+                .idUsuario(user.getIdUsuario())
                 .build();
     }
 
