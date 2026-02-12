@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+// @CrossOrigin eliminado: Se gestiona centralizadamente en SecurityConfig para evitar conflictos
 public class AuthController {
 
     private final AuthService authService;

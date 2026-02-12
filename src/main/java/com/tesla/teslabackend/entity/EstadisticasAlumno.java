@@ -2,6 +2,8 @@ package com.tesla.teslabackend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(name = "estadisticas_alumno")
@@ -22,14 +24,35 @@ public class EstadisticasAlumno {
     private Usuario usuario;
 
     @Column(name = "racha_actual")
-    @Builder.Default
-    private Integer rachaActual = 0;
+    private Integer rachaActual;
 
     @Column(name = "exp_total")
-    @Builder.Default
-    private Integer expTotal = 0;
+    private Integer expTotal;
 
-    @Column(name = "estado_mascota", length = 20)
-    @Builder.Default
-    private String estadoMascota = "egg";
+    @Column(name = "estado_mascota")
+    private String estadoMascota;
+
+    @Column(name = "ultima_fecha_mision")
+    private LocalDate ultimaFechaMision;
+
+    // Este método se llama desde el Service cuando obtiene los datos
+    public void verificarYReiniciarRacha() {
+        if (this.ultimaFechaMision != null) {
+            LocalDate hoy = LocalDate.now();
+            long diasDiferencia = ChronoUnit.DAYS.between(this.ultimaFechaMision, hoy);
+
+            // Si pasó más de 1 día sin actividad, la racha vuelve a 0 automáticamente
+            if (diasDiferencia > 1) {
+                this.rachaActual = 0;
+            }
+        }
+    }
+
+    public void calcularEstado() {
+        int exp = (this.expTotal != null) ? this.expTotal : 0;
+        if (exp < 1250) this.estadoMascota = "Huevo";
+        else if (exp < 2500) this.estadoMascota = "Agrietándose";
+        else if (exp < 3750) this.estadoMascota = "Naciendo";
+        else this.estadoMascota = "Completamente Crecido";
+    }
 }

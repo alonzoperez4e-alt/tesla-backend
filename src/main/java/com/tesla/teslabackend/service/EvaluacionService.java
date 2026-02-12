@@ -23,7 +23,7 @@ public class EvaluacionService {
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private IntentoRepository intentoRepository;
     @Autowired private ProgresoLeccionesRepository progresoRepository;
-    @Autowired private EstadisticasAlumnoRepository estadisticasRepository;
+    @Autowired private EstadosticasAlumnoRepository estadisticasRepository;
 
     // 1. Generar el cuestionario
     @Transactional(readOnly = true)
