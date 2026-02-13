@@ -59,7 +59,8 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:8081",
                 "http://localhost:5173",
-                "http://localhost:3000"
+                "http://localhost:3000",
+                "https://academia-tesla.vercel.app"
         ));
 
         config.setAllowedMethods(List.of(
