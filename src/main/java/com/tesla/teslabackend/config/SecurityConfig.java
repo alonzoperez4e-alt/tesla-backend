@@ -37,9 +37,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/estudiantes/**").permitAll()
+                        .requestMatchers("/api/v1/stats/**").permitAll()
                         .requestMatchers("/api/lecciones/**").permitAll()
                         .requestMatchers("/api/admin/**").permitAll()
-                        .requestMatchers("/api/v1/stats/**").permitAll()
+                        .requestMatchers("/api/ranking/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
