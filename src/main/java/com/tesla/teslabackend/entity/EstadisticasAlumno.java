@@ -35,6 +35,10 @@ public class EstadisticasAlumno {
     @Column(name = "ultima_fecha_mision")
     private LocalDate ultimaFechaMision;
 
+    @Column(name = "ranking_anterior")
+    private Integer rankingAnterior;
+
+
     // Este método se llama desde el Service cuando obtiene los datos
     public void verificarYReiniciarRacha() {
         if (this.ultimaFechaMision != null) {
