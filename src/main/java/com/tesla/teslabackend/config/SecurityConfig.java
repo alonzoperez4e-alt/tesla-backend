@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/estudiantes/**").permitAll()
                         .requestMatchers("/api/lecciones/**").permitAll()
+                        .requestMatchers("/api/admin/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
