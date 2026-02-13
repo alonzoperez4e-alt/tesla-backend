@@ -1,7 +1,9 @@
 package com.tesla.teslabackend.service;
 
 import com.tesla.teslabackend.entity.EstadisticasAlumno;
+import com.tesla.teslabackend.entity.Usuario;
 import com.tesla.teslabackend.repository.EstadosticasAlumnoRepository;
+import com.tesla.teslabackend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,16 +16,24 @@ public class EstadisticaService {
     @Autowired
     private EstadosticasAlumnoRepository repository;
 
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
     @Transactional
     public EstadisticasAlumno obtenerPorId(Integer idUsuario) {
+
         EstadisticasAlumno stats = repository.findById(idUsuario).orElseGet(() -> {
+            Usuario usuario = usuarioRepository.findById(idUsuario)
+                    .orElseThrow(() -> new RuntimeException("Usuario no existe: " + idUsuario));
+
             EstadisticasAlumno nueva = EstadisticasAlumno.builder()
-                    .idUsuario(idUsuario)
+                    .usuario(usuario) // ✅ CLAVE para @MapsId
                     .rachaActual(0)
                     .expTotal(0)
                     .estadoMascota("Huevo")
-                    .ultimaFechaMision(LocalDate.now().minusDays(1)) // Inicializamos un día antes
+                    .ultimaFechaMision(LocalDate.now().minusDays(1))
                     .build();
+
             return repository.save(nueva);
         });
 

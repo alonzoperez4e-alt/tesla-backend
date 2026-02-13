@@ -18,6 +18,7 @@ public class EstadisticaController {
     // Endpoint para ver el dinosaurio
     @GetMapping("/{idUsuario}")
     public ResponseEntity<EstadisticasAlumno> getStats(@PathVariable Integer idUsuario) {
+        System.out.println(">>> ENTRO A STATS <<<");
         return ResponseEntity.ok(service.obtenerPorId(idUsuario));
     }
 

@@ -17,9 +17,9 @@ public class EstadisticasAlumno {
     @Column(name = "id_usuario")
     private Integer idUsuario;
 
-    @OneToOne
-    @MapsId // Esto dice: "Mi ID es el mismo que el del Usuario asociado"
-    @JoinColumn(name = "id_usuario")
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name = "id_usuario", nullable = false)
     @ToString.Exclude
     private Usuario usuario;
 
