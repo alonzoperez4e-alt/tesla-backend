@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/estudiantes")
+@RequestMapping("api/v1/estudiantes")
 // @CrossOrigin eliminado para evitar conflictos con CorsConfig
 public class EstudianteController {
 

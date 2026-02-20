@@ -58,25 +58,47 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.codigoUsuario(),
+                        request.codigo(),
                         request.password()
                 )
         );
 
-        Usuario user = usuarioDao.findByCodigoUsuario(request.codigoUsuario())
+        Usuario user = usuarioDao.findByCodigoUsuario(request.codigo())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
+        return getAuthenticationResponse(user);
+    }
+
+    @Override
+    public AuthenticationResponse refresh(String refreshToken) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new IllegalArgumentException("Refresh token missing");
+        }
+
+        String codigoUsuario = jwtService.extractUsername(refreshToken); // o metodo equivalente en tu JwtService
+        Usuario user = usuarioDao.findByCodigoUsuario(codigoUsuario)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (!jwtService.isTokenValid(refreshToken, user)) {
+            throw new IllegalArgumentException("Invalid refresh token");
+        }
+
+        return getAuthenticationResponse(user);
+    }
+
+    private AuthenticationResponse getAuthenticationResponse(Usuario user) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("idUsuario", user.getIdUsuario());
         claims.put("nombre", user.getNombre());
         claims.put("apellido", user.getApellido());
-        claims.put("rol", user.getRol().name());
 
-        String accessToken = jwtService.generateToken(user, claims);
-        String refreshToken = jwtService.generateRefreshToken(user, claims);
+        String newAccessToken = jwtService.generateToken(user, claims);
+        String newRefreshToken = jwtService.generateRefreshToken(user, claims); // rotación
 
         return AuthenticationResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .role(user.getRol().name())
                 .build();
     }
 }

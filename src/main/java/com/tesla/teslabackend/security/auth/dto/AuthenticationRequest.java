@@ -1,7 +1,7 @@
 package com.tesla.teslabackend.security.auth.dto;
 
 public record AuthenticationRequest(
-        String codigoUsuario,
+        String codigo,
         String password
 ) {
 }

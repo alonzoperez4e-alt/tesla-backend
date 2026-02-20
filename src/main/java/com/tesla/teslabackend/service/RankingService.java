@@ -36,7 +36,7 @@ public class RankingService {
 
             RankingItemDTO dto = new RankingItemDTO(
                     stats.getUsuario().getIdUsuario(),
-                    esYo ? "Diego" : nombreCompleto,
+                    nombreCompleto,
                     inicial,
                     stats.getExpTotal(),
                     posicion,
