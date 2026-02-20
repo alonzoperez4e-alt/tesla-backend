@@ -6,6 +6,7 @@ import com.tesla.teslabackend.security.auth.dto.AuthenticationResponse;
 
 public interface IAuthenticationService {
 
-    //public AuthenticationResponse register(RegisterRequest registerRequest);
-    public AuthenticationResponse authenticate(AuthenticationRequest request);
+    // AuthenticationResponse register(RegisterRequest registerRequest);
+    AuthenticationResponse authenticate(AuthenticationRequest request);
+    AuthenticationResponse refresh(String refreshToken);
 }
