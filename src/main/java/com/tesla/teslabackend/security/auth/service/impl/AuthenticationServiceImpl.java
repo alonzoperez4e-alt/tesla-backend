@@ -1,7 +1,7 @@
 package com.tesla.teslabackend.security.auth.service.impl;
 
-import com.tesla.teslabackend.entity.Usuario;
-import com.tesla.teslabackend.repository.UsuarioRepository;
+import com.tesla.teslabackend.user.entity.Usuario;
+import com.tesla.teslabackend.user.repository.UsuarioRepository;
 import com.tesla.teslabackend.security.auth.dto.AuthenticationRequest;
 import com.tesla.teslabackend.security.auth.dto.AuthenticationResponse;
 import com.tesla.teslabackend.security.auth.service.IAuthenticationService;
