@@ -7,6 +7,8 @@ import com.tesla.teslabackend.course.dto.CrearCursoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,8 +25,10 @@ public class CourseController {
     // ==========================================
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('administrador')")
     public ResponseEntity<Curso> crearCurso(@RequestBody CrearCursoDTO dto) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("Authorities: " + auth.getAuthorities());
         return ResponseEntity.ok(courseService.crearCurso(dto));
     }
 

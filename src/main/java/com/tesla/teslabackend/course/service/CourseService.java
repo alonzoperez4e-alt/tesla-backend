@@ -29,9 +29,10 @@ public class CourseService {
     @Transactional
     public Curso crearCurso(CrearCursoDTO dto) {
         Curso curso = new Curso();
+
         curso.setNombre(dto.nombre());
         curso.setDescripcion(dto.descripcion());
-        curso.setIsHabilitado(dto.isHabilitado());
+        curso.setIsHabilitado(true);
         return cursoRepository.save(curso);
     }
 

@@ -18,7 +18,7 @@ public class QuestionController {
     // Antes: /api/v1/admin/preguntas
     // Ahora: POST /api/v1/questions
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('Administrador')")
     public ResponseEntity<Pregunta> crearPregunta(@RequestBody CrearPreguntaDTO dto) {
         return ResponseEntity.ok(questionService.crearPreguntaConAlternativas(dto));
     }

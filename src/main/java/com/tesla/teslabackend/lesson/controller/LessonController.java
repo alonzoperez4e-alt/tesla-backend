@@ -23,7 +23,7 @@ public class LessonController {
     // Antes: /api/v1/admin/lecciones
     // Ahora: POST /api/v1/lessons
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('Administrador')")
     public ResponseEntity<Leccion> crearLeccion(@RequestBody CrearLeccionDTO dto) {
         return ResponseEntity.ok(lessonService.crearLeccion(dto));
     }

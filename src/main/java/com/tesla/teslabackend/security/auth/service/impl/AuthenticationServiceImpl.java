@@ -91,6 +91,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         claims.put("idUsuario", user.getIdUsuario());
         claims.put("nombre", user.getNombre());
         claims.put("apellido", user.getApellido());
+        claims.put("role", user.getRol().name()); //Agregamos rol para recibir peticiones del frontend
 
         String newAccessToken = jwtService.generateToken(user, claims);
         String newRefreshToken = jwtService.generateRefreshToken(user, claims); // rotación

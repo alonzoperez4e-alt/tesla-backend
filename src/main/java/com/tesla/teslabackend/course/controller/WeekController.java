@@ -18,7 +18,7 @@ public class WeekController {
     // Antes: /api/v1/admin/semanas
     // Ahora: POST /api/v1/weeks
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('Administrador')")
     public ResponseEntity<Semana> crearSemana(@RequestBody CrearSemanaDTO dto) {
         return ResponseEntity.ok(weekService.crearSemana(dto));
     }
