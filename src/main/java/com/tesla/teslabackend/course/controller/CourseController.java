@@ -1,5 +1,6 @@
 package com.tesla.teslabackend.course.controller;
 
+import com.tesla.teslabackend.course.dto.CursoDTO;
 import com.tesla.teslabackend.course.entity.Curso;
 import com.tesla.teslabackend.course.service.CourseService;
 import com.tesla.teslabackend.course.dto.CaminoCursoDTO;
@@ -39,7 +40,7 @@ public class CourseController {
     // Antes: GET /api/v1/estudiantes/cursos
     // Ahora: GET /api/v1/courses
     @GetMapping
-    public ResponseEntity<List<Curso>> listarCursos() {
+    public ResponseEntity<List<CursoDTO>> listarCursos() {
         return ResponseEntity.ok(courseService.obtenerCursosDisponibles());
     }
 

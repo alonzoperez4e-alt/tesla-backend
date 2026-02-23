@@ -1,12 +1,9 @@
 package com.tesla.teslabackend.course.service;
 
-import com.tesla.teslabackend.course.dto.CrearCursoDTO;
+import com.tesla.teslabackend.course.dto.*;
 import com.tesla.teslabackend.course.entity.Curso;
 import com.tesla.teslabackend.course.entity.Semana;
 
-import com.tesla.teslabackend.course.dto.CaminoCursoDTO;
-import com.tesla.teslabackend.course.dto.LeccionDTO;
-import com.tesla.teslabackend.course.dto.SemanaDTO;
 import com.tesla.teslabackend.course.repository.CursoRepository;
 import com.tesla.teslabackend.course.repository.SemanaRepository;
 import com.tesla.teslabackend.progress.service.ProgressService; // Importamos el nuevo servicio
@@ -17,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class CourseService {
@@ -37,8 +35,13 @@ public class CourseService {
     }
 
     @Transactional(readOnly = true)
-    public List<Curso> obtenerCursosDisponibles() {
-        return cursoRepository.findByIsHabilitadoTrue();
+    public List<CursoDTO> obtenerCursosDisponibles() {
+        return cursoRepository.findByIsHabilitadoTrue().stream().map(c -> new CursoDTO(
+                c.getIdCurso(),
+                c.getNombre(),
+                c.getDescripcion(),
+                c.getIsHabilitado()
+        )).toList();
     }
 
     @Transactional(readOnly = true)
