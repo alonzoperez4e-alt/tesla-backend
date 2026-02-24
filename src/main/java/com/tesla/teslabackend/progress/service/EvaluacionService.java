@@ -90,9 +90,14 @@ public class EvaluacionService {
                         .orElseGet(() -> {
                             EstadisticasAlumno nueva = new EstadisticasAlumno();
                             nueva.setUsuario(usuario);
+                            nueva.setExpTotal(0);
+                            nueva.setExpSemanal(0);
                             return nueva;
                         });
+
                 stats.setExpTotal((stats.getExpTotal() == null ? 0 : stats.getExpTotal()) + expGanada);
+                stats.setExpSemanal((stats.getExpSemanal() == null ? 0 : stats.getExpSemanal()) + expGanada);
+
                 estadisticasRepository.save(stats);
             }
         }

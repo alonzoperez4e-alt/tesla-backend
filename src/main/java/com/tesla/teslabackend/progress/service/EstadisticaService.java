@@ -18,19 +18,19 @@ public class EstadisticaService {
     private EstadisticasAlumnoRepository repository;
 
     @Autowired
-    private UsuarioRepository usuarioRepository; // Válido inyectarlo aquí para crear la relación inicial
+    private UsuarioRepository usuarioRepository;
 
     @Transactional
     public EstadisticasAlumno obtenerPorId(Integer idUsuario) {
-
         EstadisticasAlumno stats = repository.findById(idUsuario).orElseGet(() -> {
             Usuario usuario = usuarioRepository.findById(idUsuario)
                     .orElseThrow(() -> new RuntimeException("Usuario no existe: " + idUsuario));
 
             EstadisticasAlumno nueva = EstadisticasAlumno.builder()
-                    .usuario(usuario) // ✅ CLAVE para @MapsId
+                    .usuario(usuario)
                     .rachaActual(0)
                     .expTotal(0)
+                    .expSemanal(0) // Inicializado a 0
                     .estadoMascota("Huevo")
                     .ultimaFechaMision(LocalDate.now().minusDays(1))
                     .build();
@@ -43,34 +43,28 @@ public class EstadisticaService {
         return repository.save(stats);
     }
 
-    /**
-     * ESTE MÉTODO ES EL QUE HACE QUE LA RACHA SUBA.
-     * Se debe llamar cuando el alumno completa una misión/clase.
-     */
     @Transactional
     public EstadisticasAlumno actualizarProgreso(Integer idUsuario, int puntosExp) {
-        EstadisticasAlumno stats = obtenerPorId(idUsuario); // Obtenemos las stats actuales
+        EstadisticasAlumno stats = obtenerPorId(idUsuario);
         LocalDate hoy = LocalDate.now();
         LocalDate ultimaVez = stats.getUltimaFechaMision();
 
         if (ultimaVez != null) {
             long diasDiferencia = ChronoUnit.DAYS.between(ultimaVez, hoy);
-
             if (diasDiferencia == 1) {
-                // Si completó ayer y completa hoy: ¡Sube racha!
                 stats.setRachaActual(stats.getRachaActual() + 1);
             } else if (diasDiferencia > 1) {
-                // Si pasó más de un día: Racha vuelve a 1 (la de hoy)
                 stats.setRachaActual(1);
             }
-            // Si la diferencia es 0, ya hizo una misión hoy, no subimos racha de nuevo.
         } else {
-            stats.setRachaActual(1); // Primera vez
+            stats.setRachaActual(1);
         }
 
-        stats.setExpTotal(stats.getExpTotal() + puntosExp);
+        stats.setExpTotal((stats.getExpTotal() != null ? stats.getExpTotal() : 0) + puntosExp);
+        stats.setExpSemanal((stats.getExpSemanal() != null ? stats.getExpSemanal() : 0) + puntosExp);
+
         stats.setUltimaFechaMision(hoy);
-        stats.calcularEstado(); // Verificamos si el dinosaurio evoluciona
+        stats.calcularEstado();
 
         return repository.save(stats);
     }
