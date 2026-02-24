@@ -27,13 +27,21 @@ public class LessonService {
     @Transactional
     public Leccion crearLeccion(CrearLeccionDTO dto) {
         Semana semana = semanaRepository.findById(dto.idSemana())
-                .orElseThrow(() -> new RuntimeException("Semana no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Semana no encontrada con ID: " + dto.idSemana()));
+
+        // Autocalcular el orden: Contamos cuántas lecciones tiene actualmente esta semana
+        // y le sumamos 1 para la nueva lección.
+        int cantidadLeccionesActuales = leccionRepository.countBySemana(semana);
+        int nuevoOrden = cantidadLeccionesActuales + 1;
 
         Leccion leccion = new Leccion();
         leccion.setSemana(semana);
         leccion.setNombre(dto.nombre());
         leccion.setDescripcion(dto.descripcion());
-        leccion.setOrden(dto.orden());
+
+        // Asignamos el orden calculado por el backend, ignorando el que mande el DTO
+        leccion.setOrden(nuevoOrden);
+
         return leccionRepository.save(leccion);
     }
 

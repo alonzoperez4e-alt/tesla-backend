@@ -27,6 +27,9 @@ public class Pregunta {
     @Column(name = "texto_pregunta", nullable = false, columnDefinition = "TEXT")
     private String textoPregunta;
 
+    @Column(name = "pregunta_imagen_url", columnDefinition = "TEXT")
+    private String preguntaImagenUrl;
+
     @Column(name = "solucion_texto", columnDefinition = "TEXT")
     private String solucionTexto;
 

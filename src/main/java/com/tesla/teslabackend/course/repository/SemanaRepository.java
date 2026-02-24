@@ -15,4 +15,6 @@ public interface SemanaRepository extends JpaRepository<Semana, Integer> {
     // Ordenamos por número de semana y orden de lección para mantener la secuencia
     @Query("SELECT DISTINCT s FROM Semana s LEFT JOIN FETCH s.lecciones l WHERE s.curso.idCurso = :idCurso ORDER BY s.nroSemana ASC, l.orden ASC")
     List<Semana> findByCursoIdConLecciones(@Param("idCurso") Integer idCurso);
+
+    List<Semana> findByCursoIdCurso(Integer idCurso);
 }
