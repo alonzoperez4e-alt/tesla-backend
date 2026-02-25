@@ -30,7 +30,6 @@ public class EstadisticasAlumno {
     @Column(name = "exp_total")
     private Integer expTotal;
 
-    // NUEVO CAMPO: Experiencia exclusiva para el ranking semanal
     @Column(name = "exp_semanal")
     @Builder.Default
     private Integer expSemanal = 0;

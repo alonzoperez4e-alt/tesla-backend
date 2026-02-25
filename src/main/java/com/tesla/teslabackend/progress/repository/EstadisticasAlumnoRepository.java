@@ -20,4 +20,6 @@ public interface EstadisticasAlumnoRepository extends JpaRepository<Estadisticas
     @Modifying
     @Query("UPDATE EstadisticasAlumno e SET e.expSemanal = 0")
     void reiniciarExperienciaSemanal();
+
+
 }
