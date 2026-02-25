@@ -1,6 +1,10 @@
 package com.tesla.teslabackend.lesson.service;
 
 import com.tesla.teslabackend.course.entity.Semana;
+import com.tesla.teslabackend.lesson.dto.detalle.AlternativaDetalleDTO;
+import com.tesla.teslabackend.lesson.dto.detalle.LeccionDetalleDTO;
+import com.tesla.teslabackend.lesson.dto.detalle.PreguntaDetalleDTO;
+import com.tesla.teslabackend.lesson.dto.detalle.SemanaDetalleDTO;
 import com.tesla.teslabackend.lesson.dto.examen.AlternativaDTO;
 import com.tesla.teslabackend.lesson.dto.examen.CuestionarioDTO;
 import com.tesla.teslabackend.lesson.dto.examen.PreguntaDTO;
@@ -55,11 +59,46 @@ public class LessonService {
         List<PreguntaDTO> preguntasDTO = preguntasEntity.stream().map(p -> new PreguntaDTO(
                 p.getIdPregunta(),
                 p.getTextoPregunta(),
+                p.getPreguntaImagenUrl(),
                 p.getAlternativas().stream()
                         .map(a -> new AlternativaDTO(a.getIdAlternativa(), a.getTextoAlternativa()))
                         .collect(Collectors.toList())
         )).collect(Collectors.toList());
 
         return new CuestionarioDTO(leccion.getIdLeccion(), leccion.getNombre(), preguntasDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public SemanaDetalleDTO verDetalle(Integer idSemana) {
+        Semana semana = semanaRepository.findById(idSemana)
+                .orElseThrow(() -> new RuntimeException("Semana no encontrada"));
+
+        List<Leccion> leccionesEntity = leccionRepository.findBySemanaIdConPreguntas(idSemana);
+
+        List<LeccionDetalleDTO> leccionDetalleDTO = leccionesEntity.stream().map(l -> new LeccionDetalleDTO(
+                l.getIdLeccion(),
+                l.getNombre(),
+                l.getOrden(),
+                l.getPreguntas().stream().map(p -> new PreguntaDetalleDTO(
+                        p.getIdPregunta(),
+                        p.getTextoPregunta(),
+                        p.getPreguntaImagenUrl(),
+                        p.getSolucionTexto(),
+                        p.getSolucionImagenUrl(),
+                        p.getAlternativas().stream().map( a -> new AlternativaDetalleDTO(
+                                a.getIdAlternativa(),
+                                a.getTextoAlternativa(),
+                                a.getIsCorrecta()
+                        )).collect(Collectors.toList())
+                )).collect(Collectors.toList())
+        )).collect(Collectors.toList());
+        return new SemanaDetalleDTO(semana.getIdSemana(), semana.getNroSemana(), semana.getIsBloqueada(), leccionDetalleDTO);
+    }
+
+    @Transactional
+    public void eliminarLeccion(Integer idLeccion) {
+        Leccion leccion = leccionRepository.findById(idLeccion)
+                .orElseThrow(() -> new RuntimeException("Leccion no encontrada"));
+        leccionRepository.delete(leccion);
     }
 }

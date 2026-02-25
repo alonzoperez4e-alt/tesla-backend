@@ -1,5 +1,6 @@
 package com.tesla.teslabackend.lesson.controller;
 
+import com.tesla.teslabackend.lesson.dto.detalle.SemanaDetalleDTO;
 import com.tesla.teslabackend.progress.dto.SolicitudCalificacionDTO;
 import com.tesla.teslabackend.lesson.dto.examen.CuestionarioDTO;
 import com.tesla.teslabackend.progress.dto.resultado.ResultadoEvaluacionDTO;
@@ -10,7 +11,6 @@ import com.tesla.teslabackend.progress.service.EvaluacionService; // Importamos 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -42,12 +42,21 @@ public class LessonController {
     @PostMapping("/{idLeccion}/submit")
     public ResponseEntity<ResultadoEvaluacionDTO> finalizarLeccion(
             @PathVariable Integer idLeccion,
-            @RequestBody SolicitudCalificacionDTO solicitud,
-            Authentication authentication) { // <-- Pro-Tip de Seguridad JWT
+            @RequestBody SolicitudCalificacionDTO solicitud) { // <-- Pro-Tip de Seguridad JWT
 
-        // Extraemos el ID real del usuario desde su token, nadie puede falsificar esto
-        Integer usuarioIdAutenticado = Integer.parseInt(authentication.getName());
-
-        return ResponseEntity.ok(evaluacionService.calificarLeccion(idLeccion, usuarioIdAutenticado, solicitud));
+        return ResponseEntity.ok(evaluacionService.calificarLeccion(idLeccion, solicitud));
     }
+    @GetMapping("/{idSemana}/detalle")
+    @PreAuthorize("hasRole('administrador')")
+    public ResponseEntity<SemanaDetalleDTO> verDetalleSemana(
+            @PathVariable Integer idSemana){
+        return ResponseEntity.ok(lessonService.verDetalle(idSemana));
+    }
+
+    @DeleteMapping("/{idLeccion}")
+    public ResponseEntity<Void> eliminarLeccion(@PathVariable Integer idLeccion) {
+        lessonService.eliminarLeccion(idLeccion);
+        return ResponseEntity.noContent().build();
+    }
+
 }

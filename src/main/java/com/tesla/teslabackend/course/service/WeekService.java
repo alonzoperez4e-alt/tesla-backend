@@ -55,4 +55,9 @@ public class WeekService {
                                 )).toList()
                 )).toList();
     }
+    @Transactional
+    public void eliminarSemana(Integer idSemana) {
+        Semana semana = semanaRepository.findById(idSemana).orElseThrow(() -> new RuntimeException("Semana no encontrada"));
+        semanaRepository.delete(semana);
+    }
 }

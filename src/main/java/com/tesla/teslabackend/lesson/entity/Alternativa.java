@@ -19,6 +19,7 @@ public class Alternativa {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_pregunta")
     @JsonBackReference
+    @EqualsAndHashCode.Exclude
     private Pregunta pregunta;
 
     @Column(name = "texto_alternativa", nullable = false, columnDefinition = "TEXT")

@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "pregunta")
@@ -22,6 +25,7 @@ public class Pregunta {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_leccion")
     @JsonBackReference
+    @EqualsAndHashCode.Exclude
     private Leccion leccion;
 
     @Column(name = "texto_pregunta", nullable = false, columnDefinition = "TEXT")
@@ -39,5 +43,6 @@ public class Pregunta {
     @OneToMany(mappedBy = "pregunta", cascade = CascadeType.ALL)
     @ToString.Exclude
     @JsonManagedReference
-    private List<Alternativa> alternativas;
+    @EqualsAndHashCode.Exclude
+    private Set<Alternativa> alternativas = new LinkedHashSet<>();
 }

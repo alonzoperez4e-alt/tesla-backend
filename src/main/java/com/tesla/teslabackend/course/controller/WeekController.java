@@ -33,4 +33,11 @@ public class WeekController {
             @PathVariable Integer cursoId) {
         return ResponseEntity.ok(weekService.obtenerSemanas(cursoId));
     }
+
+    @DeleteMapping("/{semanaId}")
+    public ResponseEntity<Void> eliminarSemana(@PathVariable Integer semanaId) {
+        weekService.eliminarSemana(semanaId);
+        return ResponseEntity.noContent().build();
+
+    }
 }

@@ -5,7 +5,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.tesla.teslabackend.course.entity.Semana;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "leccion")
@@ -23,6 +26,7 @@ public class Leccion {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_semana")
     @JsonBackReference
+    @EqualsAndHashCode.Exclude
     private Semana semana;
 
     @Column(nullable = false, length = 100)
@@ -36,5 +40,6 @@ public class Leccion {
     @OneToMany(mappedBy = "leccion", cascade = CascadeType.ALL)
     @ToString.Exclude
     @JsonManagedReference
-    private List<Pregunta> preguntas;
+    @EqualsAndHashCode.Exclude
+    private Set<Pregunta> preguntas = new LinkedHashSet<>();
 }
