@@ -30,6 +30,10 @@ public class EstadisticasAlumno {
     @Column(name = "exp_total")
     private Integer expTotal;
 
+    @Column(name = "exp_semanal")
+    @Builder.Default
+    private Integer expSemanal = 0;
+
     @Column(name = "estado_mascota")
     private String estadoMascota;
 
@@ -39,14 +43,11 @@ public class EstadisticasAlumno {
     @Column(name = "ranking_anterior")
     private Integer rankingAnterior;
 
-
-    // Este método se llama desde el Service cuando obtiene los datos
     public void verificarYReiniciarRacha() {
         if (this.ultimaFechaMision != null) {
             LocalDate hoy = LocalDate.now();
             long diasDiferencia = ChronoUnit.DAYS.between(this.ultimaFechaMision, hoy);
 
-            // Si pasó más de 1 día sin actividad, la racha vuelve a 0 automáticamente
             if (diasDiferencia > 1) {
                 this.rachaActual = 0;
             }

@@ -3,15 +3,16 @@ package com.tesla.teslabackend;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 public class TeslabackendApplication {
 
 	public static void main(String[] args) {
-		// 1. Cargar las variables del .env al sistema
 		try {
 			Dotenv dotenv = Dotenv.configure()
-					.ignoreIfMissing() // No fallar si el archivo no existe (ej. en producción real)
+					.ignoreIfMissing()
 					.load();
 
 			dotenv.entries().forEach(entry ->

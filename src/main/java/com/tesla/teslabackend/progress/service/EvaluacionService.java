@@ -57,7 +57,6 @@ public class EvaluacionService {
 
         // B. Lógica de corrección
         for (RespuestaAlumnoDTO respuesta : solicitud.respuestas()) {
-            // Asumiendo que los IDs en DTO son Long. Si son Integer, quitar el casteo o ajustarlo.
             Pregunta pregunta = mapaPreguntas.get(respuesta.idPregunta());
             if (pregunta == null) continue;
 
@@ -77,22 +76,17 @@ public class EvaluacionService {
             }
 
             feedbackList.add(new FeedbackPreguntaDTO(
-                    pregunta.getIdPregunta(),
-                    esCorrecta,
-                    idCorrecta,
-                    pregunta.getSolucionTexto(),
-                    pregunta.getSolucionImagenUrl()
+                    pregunta.getIdPregunta(), esCorrecta, idCorrecta,
+                    pregunta.getSolucionTexto(), pregunta.getSolucionImagenUrl()
             ));
         }
 
         // C. Cálculo de Puntos y Ranking
-        // Usamos IDs Long para la consulta
         boolean esPrimerIntento = !intentoRepository.existsByUsuarioIdUsuarioAndLeccionIdLeccion(usuario.getIdUsuario(), leccion.getIdLeccion());
         int expGanada = 0;
 
         if (esPrimerIntento) {
-            expGanada = respuestasCorrectas * 10;
-
+            expGanada = respuestasCorrectas * 30;
             if (expGanada > 0) {
                 EstadisticasAlumno stats = estadisticasRepository.findById(usuario.getIdUsuario())
                         .orElseGet(() -> {
@@ -100,11 +94,7 @@ public class EvaluacionService {
                             nueva.setUsuario(usuario);
                             return nueva;
                         });
-
-                stats.setExpTotal(
-                        (stats.getExpTotal() == null ? 0 : stats.getExpTotal()) + expGanada
-                );
-
+                stats.setExpTotal((stats.getExpTotal() == null ? 0 : stats.getExpTotal()) + expGanada);
                 estadisticasRepository.save(stats);
             }
         }
@@ -117,18 +107,14 @@ public class EvaluacionService {
         intento.setIsPrimerIntento(esPrimerIntento);
         intentoRepository.save(intento);
 
-        // E. Actualizar Progreso (CORRECCIÓN CRÍTICA AQUÍ)
-        // Buscamos usando la clave compuesta con los IDs Long (o Integer según definiste ProgresoLeccionesId)
-        // NOTA: ProgresoLeccionesId espera (usuario, leccion)
+        // E. Actualizar Progreso
         ProgresoLecciones progreso = progresoRepository.findById(new ProgresoLeccionesId(usuario.getIdUsuario(), leccion.getIdLeccion()))
-                .orElse(null); // Si no existe, devuelve null
+                .orElse(null);
 
-        if (progreso == null) { // Es nuevo
+        if (progreso == null) {
             progreso = new ProgresoLecciones();
-            progreso.setUsuario(usuario); // Seteamos la relación, el ID se deriva de aquí
+            progreso.setUsuario(usuario);
             progreso.setLeccion(leccion);
-            // No usamos setId(), ni creamos un ProgresoLeccionesId manual aquí.
-            // Al guardar, JPA usará los IDs de usuario y leccion.
         }
 
         progreso.setCompletada(true);
@@ -138,11 +124,6 @@ public class EvaluacionService {
 
         progresoRepository.save(progreso);
 
-        return new ResultadoEvaluacionDTO(
-                respuestasCorrectas,
-                expGanada,
-                true,
-                feedbackList
-        );
+        return new ResultadoEvaluacionDTO(respuestasCorrectas, expGanada, true, feedbackList);
     }
 }
