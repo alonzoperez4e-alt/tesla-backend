@@ -31,6 +31,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
+protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    String path = request.getServletPath();
+    // Esto evita que el filtro procese las peticiones de login, registro o refresh.
+    // Deja que el AuthController se encargue de ellas limpiamente.
+    return path.startsWith("/api/v1/auth/");
+}
+
+    @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             @NonNull HttpServletResponse response,
