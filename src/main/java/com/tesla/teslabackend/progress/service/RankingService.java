@@ -19,7 +19,6 @@ public class RankingService {
     @Transactional(readOnly = true)
     public List<RankingItemDTO> obtenerRanking(Integer idUsuarioLogueado) {
 
-        // Llamamos al método que ordena por expSemanal
         List<EstadisticasAlumno> listaOrdenada = estadisticasRepository.findAllByOrderByExpSemanalDesc();
         List<RankingItemDTO> rankingDTOs = new ArrayList<>();
 

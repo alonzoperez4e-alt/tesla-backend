@@ -6,9 +6,11 @@ import com.tesla.teslabackend.progress.entity.HistorialRanking;
 import com.tesla.teslabackend.progress.repository.EstadisticasAlumnoRepository;
 import com.tesla.teslabackend.progress.repository.HistorialRankingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +31,6 @@ public class RankingController {
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> obtenerRankingGeneral(@RequestParam(required = false) Integer userId) {
         List<EstadisticasAlumno> todosLosAlumnos = estadisticasRepository.findAllByOrderByExpSemanalDesc();
-
         List<Map<String, Object>> respuesta = new ArrayList<>();
         int posicion = 1;
 
@@ -44,7 +45,6 @@ public class RankingController {
             dto.put("expTotal", expSemanal);
             dto.put("experiencia", expSemanal);
 
-            // ✨ ENVIAMOS EL RANKING ANTERIOR
             int rankAnt = (alumno.getRankingAnterior() != null) ? alumno.getRankingAnterior() : 0;
             dto.put("rankingAnterior", rankAnt);
 
@@ -54,7 +54,6 @@ public class RankingController {
             respuesta.add(dto);
             posicion++;
         }
-
         return ResponseEntity.ok(respuesta);
     }
 
@@ -65,7 +64,7 @@ public class RankingController {
         int posicion = 1;
 
         for (EstadisticasAlumno alumno : rankingActual) {
-            if (alumno.getExpSemanal() != null && alumno.getExpSemanal() > 0) {
+            if (alumno.getExpSemanal() != null) {
                 Map<String, Object> dto = new HashMap<>();
                 dto.put("idUsuario", alumno.getUsuario().getIdUsuario());
                 dto.put("posicion", posicion);
@@ -100,5 +99,28 @@ public class RankingController {
         )).collect(Collectors.toList());
 
         return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/historial/fechas")
+    public ResponseEntity<List<LocalDate>> obtenerFechasHistorial() {
+        return ResponseEntity.ok(historialRepository.obtenerFechasDisponibles());
+    }
+
+    @GetMapping("/historial/admin")
+    public ResponseEntity<List<Map<String, Object>>> obtenerRankingPorFecha(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+
+        List<HistorialRanking> historial = historialRepository.findByFechaFinSemanaOrderByPosicionAsc(fecha);
+        List<Map<String, Object>> respuesta = new ArrayList<>();
+
+        for (HistorialRanking h : historial) {
+            Map<String, Object> dto = new HashMap<>();
+            dto.put("posicion", h.getPosicion());
+            dto.put("nombreCompleto", h.getUsuario().getNombre() + " " + h.getUsuario().getApellido());
+            dto.put("expParaRanking", h.getExpObtenida());
+            respuesta.add(dto);
+        }
+
+        return ResponseEntity.ok(respuesta);
     }
 }

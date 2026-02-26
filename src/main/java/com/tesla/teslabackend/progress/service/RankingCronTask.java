@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -26,24 +27,26 @@ public class RankingCronTask {
         log.info("⏰ Iniciando guardado de Historial y reinicio semanal...");
         try {
             List<EstadisticasAlumno> rankingActual = estadisticasRepository.findAllByOrderByExpSemanalDesc();
-            LocalDate fechaFin = LocalDate.now().minusDays(1);
+
+            LocalDate fechaFin = LocalDate.now(ZoneId.of("America/Lima"));
             int mes = fechaFin.getMonthValue();
             int anio = fechaFin.getYear();
 
-            int limite = Math.min(3, rankingActual.size());
-            for (int i = 0; i < limite; i++) {
-                EstadisticasAlumno alumno = rankingActual.get(i);
+            int posicionGuardado = 1;
+            for (EstadisticasAlumno alumno : rankingActual) {
+                // Solo guardamos en el historial si tienen experiencia mayor a 0
                 if (alumno.getExpSemanal() != null && alumno.getExpSemanal() > 0) {
                     HistorialRanking registro = HistorialRanking.builder()
                             .usuario(alumno.getUsuario())
                             .expObtenida(alumno.getExpSemanal())
-                            .posicion(i + 1)
+                            .posicion(posicionGuardado)
                             .fechaFinSemana(fechaFin)
                             .mes(mes)
                             .anio(anio)
                             .build();
                     historialRepository.save(registro);
                 }
+                posicionGuardado++;
             }
 
             int posicionActual = 1;
@@ -60,10 +63,10 @@ public class RankingCronTask {
 
             estadisticasRepository.saveAll(rankingActual);
 
-            log.info("✅ Historial TOP 3 guardado, ranking anterior actualizado y torneo semanal reiniciado a 0.");
+            log.info("✅ Historial COMPLETO guardado, ranking anterior actualizado y torneo semanal reiniciado a 0.");
 
         } catch (Exception e) {
-            log.error("❌ Error al reiniciar el ranking semanal: {}", e.getMessage());
+            log.error("❌ Error al reiniciar el ranking semanal: {}", e.getMessage(), e);
         }
     }
 }
