@@ -1,5 +1,7 @@
 package com.tesla.teslabackend.security.auth.service.impl;
 
+import com.tesla.teslabackend.security.auth.dto.RegisterRequest;
+import com.tesla.teslabackend.user.entity.Rol;
 import com.tesla.teslabackend.user.entity.Usuario;
 import com.tesla.teslabackend.user.repository.UsuarioRepository;
 import com.tesla.teslabackend.security.auth.dto.AuthenticationRequest;
@@ -25,33 +27,33 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     // Habilitar cuando se quiera implementar el registro de usuarios (para cuando mesones quiera o cuando queramos incrementar la cantidad de usuarios)
-//    @Override
-//    public AuthenticationResponse register(RegisterRequest registerRequest) {
-//
-//        if (usuarioDao.findByEmail(registerRequest.getEmail()).isPresent()) throw new IllegalArgumentException("Email already in use");
-//
-//        Usuario user = Usuario.builder()
-//                .firstname(registerRequest.getFirstname())
-//                .lastname(registerRequest.getLastname())
-//                .email(registerRequest.getEmail())
-//                .phone(registerRequest.getPhone())
-//                .birthDate(LocalDate.parse(registerRequest.getBirthdate()))
-//                .password(passwordEncoder.encode(registerRequest.getPassword()))
-//                .role(Role.CIUDADANO)
-//                .build();
-//
-//
-//        usuarioDao.save(user);
-//
-//        String accessToken = jwtService.generateToken(user, new HashMap<>());
-//        String refreshToken = jwtService.generateRefreshToken(user, new HashMap<>());
-//
-//        return AuthenticationResponse.builder()
-//                .accessToken(accessToken)
-//                .refreshToken(refreshToken)
-//                .role(user.getRole().name())
-//                .build();
-//    }
+    @Override
+    public AuthenticationResponse register(RegisterRequest registerRequest) {
+
+        if (usuarioDao.findByCodigoUsuario(registerRequest.getCodigo()).isPresent()) throw new IllegalArgumentException("Student Code already in use");
+
+        Usuario user = Usuario.builder()
+                .codigoUsuario(registerRequest.getCodigo())
+                .nombre(registerRequest.getNombre())
+                .apellido(registerRequest.getApellido())
+                .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .rol(registerRequest.getRol().equalsIgnoreCase("alumno") ? Rol.alumno : (registerRequest.getRol().equalsIgnoreCase("administrador") ? Rol.administrador : Rol.padre)) // Asignar rol basado en el string recibido
+                .area(registerRequest.getArea())
+                .tipoAlumno(registerRequest.getTipoAlumno())
+                .build();
+
+
+        usuarioDao.save(user);
+
+        String accessToken = jwtService.generateToken(user, new HashMap<>());
+        String refreshToken = jwtService.generateRefreshToken(user, new HashMap<>());
+
+        return AuthenticationResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .role(user.getRol().name())
+                .build();
+    }
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {

@@ -2,6 +2,7 @@ package com.tesla.teslabackend.security.auth.controller;
 
 import com.tesla.teslabackend.security.auth.dto.AuthenticationRequest;
 import com.tesla.teslabackend.security.auth.dto.AuthenticationResponse;
+import com.tesla.teslabackend.security.auth.dto.RegisterRequest;
 import com.tesla.teslabackend.security.auth.service.IAuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,21 @@ import org.springframework.web.bind.annotation.*;
 public class AuthenticationController {
 
     private final IAuthenticationService authenticationService;
+
+    @PostMapping("/register")
+    public ResponseEntity<AuthenticationResponse> register(
+            @RequestBody RegisterRequest request,
+            HttpServletResponse response
+    ) {
+        AuthenticationResponse auth = authenticationService.register(request);
+
+        addRefreshCookie(response, auth.refreshToken());
+
+        return ResponseEntity.ok(AuthenticationResponse.builder()
+                .accessToken(auth.accessToken())
+                .role(auth.role())
+                .build());
+    }
 
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> login(
