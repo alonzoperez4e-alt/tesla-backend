@@ -28,8 +28,8 @@ public class Usuario implements UserDetails {
     @Column(name = "codigo_usuario", unique = true, nullable = false, length = 20)
     private String codigoUsuario;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String password;
+    @Column(name = "cognito_sub", unique = true, length = 50)
+    private String cognitoSub;
 
     @Column(nullable = false, length = 100)
     private String nombre;
@@ -63,7 +63,7 @@ public class Usuario implements UserDetails {
 
     @Override
     public String getPassword() {
-        return password;
+        return cognitoSub;
     }
 
     @Override
