@@ -77,3 +77,8 @@ resource "aws_cognito_user_group" "alumno" {
   name         = "alumno"
   user_pool_id = aws_cognito_user_pool.pool.id
 }
+
+resource "aws_cognito_user_pool_domain" "auth_domain" {
+  domain       = "${var.prefix}-auth-domain"
+  user_pool_id = aws_cognito_user_pool.pool.id
+}
