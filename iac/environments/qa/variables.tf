@@ -1,3 +1,8 @@
+variable "aws_region" {
+  description = "Región de AWS donde se desplegarán los recursos"
+  type        = string
+}
+
 variable "prefix" {
   description = "Prefijo para los nombres de los recursos"
   type        = string
