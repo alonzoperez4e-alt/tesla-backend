@@ -1,4 +1,4 @@
-output "dev_cognito_user_pool_id" {
+output "qa_cognito_user_pool_id" {
   value = module.cognito.user_pool_id
   description = "ID del User Pool de Cognito para application-qa.properties"
 }
