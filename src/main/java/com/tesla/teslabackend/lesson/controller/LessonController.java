@@ -8,9 +8,13 @@ import com.tesla.teslabackend.lesson.dto.CrearLeccionDTO;
 import com.tesla.teslabackend.lesson.entity.Leccion;
 import com.tesla.teslabackend.lesson.service.LessonService;
 import com.tesla.teslabackend.progress.service.EvaluacionService; // Importamos el servicio de progreso
+import com.tesla.teslabackend.user.component.IdentityExtractor;
+import com.tesla.teslabackend.user.entity.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,6 +24,7 @@ public class LessonController {
     @Autowired private LessonService lessonService;
     @Autowired private EvaluacionService evaluacionService;
 
+    private IdentityExtractor identityExtractor;
     // Antes: /api/v1/admin/lecciones
     // Ahora: POST /api/v1/lessons
     @PostMapping
@@ -42,10 +47,14 @@ public class LessonController {
     @PostMapping("/{idLeccion}/submit")
     public ResponseEntity<ResultadoEvaluacionDTO> finalizarLeccion(
             @PathVariable Integer idLeccion,
+            @AuthenticationPrincipal Jwt jwt,
             @RequestBody SolicitudCalificacionDTO solicitud) { // <-- Pro-Tip de Seguridad JWT
 
-        return ResponseEntity.ok(evaluacionService.calificarLeccion(idLeccion, solicitud));
+        Usuario usuario = identityExtractor.getUsuario(jwt);
+
+        return ResponseEntity.ok(evaluacionService.calificarLeccion(idLeccion, solicitud, usuario));
     }
+
     @GetMapping("/{idSemana}/detalle")
     @PreAuthorize("hasRole('administrador')")
     public ResponseEntity<SemanaDetalleDTO> verDetalleSemana(
