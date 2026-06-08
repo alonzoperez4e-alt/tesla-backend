@@ -40,6 +40,7 @@ public class Pregunta {
     @Column(name = "solucion_imagen_url", columnDefinition = "TEXT")
     private String solucionImagenUrl;
 
+    @Builder.Default
     @OneToMany(mappedBy = "pregunta", cascade = CascadeType.ALL)
     @ToString.Exclude
     @JsonManagedReference

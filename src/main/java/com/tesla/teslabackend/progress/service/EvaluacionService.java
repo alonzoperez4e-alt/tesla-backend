@@ -38,11 +38,9 @@ public class EvaluacionService {
     @Autowired private EstadisticasAlumnoRepository estadisticasRepository;
 
     @Transactional
-    public ResultadoEvaluacionDTO calificarLeccion(Integer idLeccion, SolicitudCalificacionDTO solicitud) {
+    public ResultadoEvaluacionDTO calificarLeccion(Integer idLeccion, SolicitudCalificacionDTO solicitud, Usuario usuario) {
 
         // A. Validaciones
-        Usuario usuario = usuarioRepository.findById(solicitud.idUsuario())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado en la Academia Tesla"));
         Leccion leccion = leccionRepository.findById(idLeccion)
                 .orElseThrow(() -> new RuntimeException("Lección no encontrada"));
 

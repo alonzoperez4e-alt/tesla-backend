@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Usuario implements UserDetails {
+public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,8 +28,8 @@ public class Usuario implements UserDetails {
     @Column(name = "codigo_usuario", unique = true, nullable = false, length = 20)
     private String codigoUsuario;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String password;
+    @Column(name = "cognito_sub", unique = true, length = 50)
+    private String cognitoSub;
 
     @Column(nullable = false, length = 100)
     private String nombre;
@@ -50,28 +50,5 @@ public class Usuario implements UserDetails {
     @CreationTimestamp
     @Column(name = "fecha_registro", updatable = false)
     private LocalDateTime fechaRegistro;
-
-    @Override
-    public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(rol.name()));
-    }
-
-    @Override
-    public @NonNull String getUsername() {
-        return codigoUsuario;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() { return true; }
-    @Override
-    public boolean isAccountNonLocked() { return true; }
-    @Override
-    public boolean isCredentialsNonExpired() { return true; }
-    @Override
-    public boolean isEnabled() { return true; }
+    
 }

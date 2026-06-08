@@ -1,0 +1,9 @@
+services:
+  bd:
+    image: postgres:17-alpine
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: tesla_db

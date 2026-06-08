@@ -5,11 +5,14 @@ import com.tesla.teslabackend.course.entity.Curso;
 import com.tesla.teslabackend.course.service.CourseService;
 import com.tesla.teslabackend.course.dto.CaminoCursoDTO;
 import com.tesla.teslabackend.course.dto.CrearCursoDTO;
+import com.tesla.teslabackend.user.component.IdentityExtractor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +24,8 @@ public class CourseController {
     @Autowired
     private CourseService courseService;
 
+    private IdentityExtractor indentityExtractor;
+
     // ==========================================
     // ENDPOINTS DE ADMINISTRACIÓN (Protegidos)
     // ==========================================
@@ -28,8 +33,6 @@ public class CourseController {
     @PostMapping
     @PreAuthorize("hasRole('administrador')")
     public ResponseEntity<Curso> crearCurso(@RequestBody CrearCursoDTO dto) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("Authorities: " + auth.getAuthorities());
         return ResponseEntity.ok(courseService.crearCurso(dto));
     }
 
@@ -49,7 +52,8 @@ public class CourseController {
     @GetMapping("/{cursoId}/path")
     public ResponseEntity<CaminoCursoDTO> verCaminoCurso(
             @PathVariable Integer cursoId,
-            @RequestParam Integer usuarioId) {
+            @AuthenticationPrincipal Jwt auth) {
+        Integer usuarioId = indentityExtractor.getUsuarioId(auth);
         return ResponseEntity.ok(courseService.obtenerCaminoDelCurso(cursoId, usuarioId));
     }
 }

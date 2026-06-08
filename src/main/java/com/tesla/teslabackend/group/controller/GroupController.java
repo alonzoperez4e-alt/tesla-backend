@@ -4,8 +4,11 @@ import com.tesla.teslabackend.group.dto.GroupRankingDTO;
 import com.tesla.teslabackend.group.dto.JoinGroupRequestDTO;
 import com.tesla.teslabackend.group.entity.Group;
 import com.tesla.teslabackend.group.service.GroupService;
+import com.tesla.teslabackend.user.component.IdentityExtractor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,9 +21,12 @@ public class GroupController {
 
     private final GroupService groupService;
 
+    private IdentityExtractor identityExtractor;
+
     @PostMapping("/create")
-    public ResponseEntity<?> createGroup(@RequestParam String name, @RequestParam Long creatorId) {
+    public ResponseEntity<?> createGroup(@RequestParam String name, @AuthenticationPrincipal Jwt jwt) {
         try {
+            Long creatorId = Long.valueOf(identityExtractor.getUsuarioId(jwt));
             Group group = groupService.createGroup(name, creatorId);
             return ResponseEntity.ok(group);
         } catch (IllegalArgumentException e) {
@@ -29,9 +35,10 @@ public class GroupController {
     }
 
     @PostMapping("/join")
-    public ResponseEntity<?> joinGroup(@RequestBody JoinGroupRequestDTO request) {
+    public ResponseEntity<?> joinGroup(@RequestBody JoinGroupRequestDTO request, @AuthenticationPrincipal Jwt jwt) {
         try {
-            String groupName = groupService.joinGroup(request.getCode(), request.getStudentId());
+            Long studentId = Long.valueOf(identityExtractor.getUsuarioId(jwt));
+            String groupName = groupService.joinGroup(request.getCode(), studentId);
             return ResponseEntity.ok("Te has unido exitosamente al grupo: " + groupName);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -43,19 +50,17 @@ public class GroupController {
         return ResponseEntity.ok(groupService.getGroupRanking(groupId));
     }
 
-    @GetMapping("/student/{studentId}")
-    public ResponseEntity<Group> getStudentGroup(@PathVariable Long studentId) {
+    @GetMapping("/student/me")
+    public ResponseEntity<Group> getStudentGroup(@AuthenticationPrincipal  Jwt jwt) {
+        Long studentId = Long.valueOf(identityExtractor.getUsuarioId(jwt));
         Group group = groupService.getGroupByStudentId(studentId);
         return group != null ? ResponseEntity.ok(group) : ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{groupId}/leave")
-    public ResponseEntity<?> leaveGroup(@PathVariable Long groupId, @RequestBody java.util.Map<String, Long> payload) {
+    public ResponseEntity<?> leaveGroup(@PathVariable Long groupId, @AuthenticationPrincipal Jwt jwt) {
         try {
-            Long studentId = payload.get("studentId");
-            if (studentId == null) {
-                return ResponseEntity.badRequest().body("El studentId es obligatorio.");
-            }
+            Long studentId = Long.valueOf(identityExtractor.getUsuarioId(jwt));
 
             groupService.leaveGroup(groupId, studentId);
             return ResponseEntity.ok().body("Has salido del grupo exitosamente.");

@@ -5,9 +5,12 @@ import com.tesla.teslabackend.progress.entity.EstadisticasAlumno;
 import com.tesla.teslabackend.progress.entity.HistorialRanking;
 import com.tesla.teslabackend.progress.repository.EstadisticasAlumnoRepository;
 import com.tesla.teslabackend.progress.repository.HistorialRankingRepository;
+import com.tesla.teslabackend.user.component.IdentityExtractor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -28,8 +31,12 @@ public class RankingController {
     @Autowired
     private EstadisticasAlumnoRepository estadisticasRepository;
 
+    private IdentityExtractor identityExtractor;
+
     @GetMapping
-    public ResponseEntity<List<Map<String, Object>>> obtenerRankingGeneral(@RequestParam(required = false) Integer userId) {
+    public ResponseEntity<List<Map<String, Object>>> obtenerRankingGeneral(@AuthenticationPrincipal Jwt jwt) {
+        Integer userId = (jwt != null) ? identityExtractor.getUsuarioId(jwt) : null;
+
         List<EstadisticasAlumno> todosLosAlumnos = estadisticasRepository.findAllByOrderByExpSemanalDesc();
         List<Map<String, Object>> respuesta = new ArrayList<>();
         int posicion = 1;
@@ -58,7 +65,9 @@ public class RankingController {
     }
 
     @GetMapping("/semanal")
-    public ResponseEntity<List<Map<String, Object>>> obtenerRankingActual(@RequestParam(required = false) Integer userId) {
+    public ResponseEntity<List<Map<String, Object>>> obtenerRankingActual(@AuthenticationPrincipal Jwt jwt) {
+        Integer userId = (jwt != null) ? identityExtractor.getUsuarioId(jwt) : null;
+
         List<EstadisticasAlumno> rankingActual = estadisticasRepository.findAllByOrderByExpSemanalDesc();
         List<Map<String, Object>> respuesta = new ArrayList<>();
         int posicion = 1;

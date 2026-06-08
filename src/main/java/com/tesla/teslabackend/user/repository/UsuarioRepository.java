@@ -14,4 +14,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     // Método para verificar si ya existe antes de cargar el Excel
     boolean existsByCodigoUsuario(String codigoUsuario);
+    
+    Optional<Usuario> findByCognitoSub(String cognitoSub);
 }

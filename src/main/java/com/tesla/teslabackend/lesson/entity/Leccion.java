@@ -37,6 +37,7 @@ public class Leccion {
 
     private Integer orden;
 
+    @Builder.Default
     @OneToMany(mappedBy = "leccion", cascade = CascadeType.ALL)
     @ToString.Exclude
     @JsonManagedReference
