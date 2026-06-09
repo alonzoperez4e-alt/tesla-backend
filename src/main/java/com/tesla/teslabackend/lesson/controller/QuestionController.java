@@ -1,6 +1,5 @@
 package com.tesla.teslabackend.lesson.controller;
 
-// ... existing code ...
 import com.tesla.teslabackend.lesson.entity.Pregunta;
 import com.tesla.teslabackend.lesson.service.QuestionService;
 import com.tesla.teslabackend.lesson.dto.CrearPreguntaDTO;
