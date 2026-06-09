@@ -95,7 +95,7 @@ public class SecurityConfig {
             if ("access".equals(tokenUse)) {
                 return OAuth2TokenValidatorResult.success();
             }
-            OAuth2Error error = new OAuth2Error("invalid_token", "El token debe ser de tipo 'access', no 'id'", null);
+            OAuth2Error error = new OAuth2Error("invalid_token", "El token debe ser de tipo 'access' (token_use='access'); se recibió: " + tokenUse, null);
             return OAuth2TokenValidatorResult.failure(error);
         };
 
