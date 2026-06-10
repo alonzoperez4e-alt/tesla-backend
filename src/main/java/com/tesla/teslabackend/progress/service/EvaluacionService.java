@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class EvaluacionService {
+
+    @Autowired private RankingRedisService rankingRedisService;
 
     @Autowired private PreguntaRepository preguntaRepository;
     @Autowired private LeccionRepository leccionRepository;
@@ -81,6 +84,7 @@ public class EvaluacionService {
         // C. Cálculo de Puntos y Ranking
         boolean esPrimerIntento = !intentoRepository.existsByUsuarioIdUsuarioAndLeccionIdLeccion(usuario.getIdUsuario(), leccion.getIdLeccion());
         int expGanada = 0;
+        ZonedDateTime momentoIntento = ZonedDateTime.now(); // Capturamos el instante
 
         if (esPrimerIntento) {
             expGanada = respuestasCorrectas * 30;
@@ -92,11 +96,7 @@ public class EvaluacionService {
                             return nueva;
                         });
 
-                // ==========================================
-                // CORRECCIÓN APLICADA AQUÍ
-                // ==========================================
                 stats.ganarExperiencia(expGanada);
-
                 estadisticasRepository.save(stats);
             }
         }
@@ -107,6 +107,8 @@ public class EvaluacionService {
         intento.setLeccion(leccion);
         intento.setPuntaje(respuestasCorrectas);
         intento.setIsPrimerIntento(esPrimerIntento);
+        intento.setExpGanada(expGanada); // Nuevo campo fase 0
+        intento.setFecha(momentoIntento); // Nuevo tipo timestamptz fase 0
         intentoRepository.save(intento);
 
         // E. Actualizar Progreso
@@ -125,6 +127,18 @@ public class EvaluacionService {
         progreso.setProgresoPorcentaje(Math.max(progreso.getProgresoPorcentaje() != null ? progreso.getProgresoPorcentaje() : 0, porcentaje));
 
         progresoRepository.save(progreso);
+
+        if (expGanada > 0) {
+            final int expFinal = expGanada;
+            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                    new org.springframework.transaction.support.TransactionSynchronization() {
+                        @Override
+                        public void afterCommit() {
+                            rankingRedisService.registrarExpSemanal(usuario.getIdUsuario(), expFinal, momentoIntento);
+                        }
+                    }
+            );
+        }
 
         return new ResultadoEvaluacionDTO(respuestasCorrectas, expGanada, true, feedbackList);
     }
