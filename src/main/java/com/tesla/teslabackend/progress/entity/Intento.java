@@ -5,7 +5,7 @@ import com.tesla.teslabackend.lesson.entity.Leccion;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "intento")
@@ -36,6 +36,11 @@ public class Intento {
     @Builder.Default
     private Boolean isPrimerIntento = true;
 
+    @Column(name = "exp_ganada", nullable = false)
+    @Builder.Default
+    private Integer expGanada = 0;
+
     @CreationTimestamp
-    private LocalDateTime fecha;
+    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    private ZonedDateTime fecha;
 }

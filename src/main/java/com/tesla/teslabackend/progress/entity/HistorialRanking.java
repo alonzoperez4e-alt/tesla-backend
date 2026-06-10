@@ -6,7 +6,10 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "historial_ranking")
+@Table(name = "historial_ranking", uniqueConstraints = {
+        // --- NUEVO CONSTRAINT DE IDEMPOTENCIA ---
+        @UniqueConstraint(name = "uq_historial", columnNames = {"fecha_fin_semana", "id_usuario"})
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
