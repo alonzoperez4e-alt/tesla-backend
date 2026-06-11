@@ -17,9 +17,10 @@ public interface IntentoRepository extends JpaRepository<Intento, Integer> {
     @Query("SELECT i.leccion.idLeccion, i.puntaje FROM Intento i WHERE i.usuario.idUsuario = :idUsuario AND i.isPrimerIntento = true")
     List<Object[]> findPuntajesByUsuario(@Param("idUsuario") Integer idUsuario);
     
-    @Query("SELECT i.usuario.idUsuario, SUM(i.expGanada) FROM Intento i " +
-            "WHERE i.isPrimerIntento = true AND i.expGanada > 0 " +
-            "AND i.fecha >= :inicio AND i.fecha < :fin " +
-            "GROUP BY i.usuario.idUsuario")
+@Query("SELECT i.usuario.idUsuario, SUM(i.expGanada) FROM Intento i " +
+        "WHERE i.isPrimerIntento = true AND i.expGanada > 0 " +
+        "AND i.fecha >= :inicio AND i.fecha < :fin " +
+        "GROUP BY i.usuario.idUsuario " +
+        "ORDER BY SUM(i.expGanada) DESC")
     List<Object[]> findExpAgregadaPorVentana(@Param("inicio") ZonedDateTime inicio, @Param("fin") ZonedDateTime fin);
 }
