@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface HistorialRankingRepository extends JpaRepository<HistorialRanking, Integer> {
@@ -22,4 +23,6 @@ public interface HistorialRankingRepository extends JpaRepository<HistorialRanki
 
     @Query("SELECT h FROM HistorialRanking h JOIN FETCH h.usuario WHERE h.fechaFinSemana = :fecha ORDER BY h.posicion ASC")
     List<HistorialRanking> findByFechaFinSemanaOrderByPosicionAsc(@Param("fecha") LocalDate fecha);
+    
+    Optional<HistorialRanking> findByFechaFinSemanaAndUsuarioIdUsuario(LocalDate fechaFinSemana, Integer idUsuario);
 }

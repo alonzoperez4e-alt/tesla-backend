@@ -15,4 +15,10 @@ public class TimeUtil {
 
         return String.format("%d-W%02d", year, week);
     }
+
+    public static ZonedDateTime obtenerInicioDeSemana(ZonedDateTime fecha) {
+        return fecha.withZoneSameInstant(ZONA_LIMA)
+                .with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+                .toLocalDate().atStartOfDay(ZONA_LIMA);
+    }
 }
