@@ -45,8 +45,8 @@ public class RankingService {
 
         // consultar la informacion pesada a BD (Nombres, rankingAnterior)
         List<EstadisticasAlumno> statsList = estadisticasRepository.findAllById(idsTop);
-        Map<Integer, EstadisticasAlumno> statsMap = statsList.stream()
-                .collect(Collectors.toMap(s -> s.getUsuario().getIdUsuario(), s -> s));
+Map<Integer, EstadisticasAlumno> statsMap = statsList.stream()
+        .collect(Collectors.toMap(EstadisticasAlumno::getIdUsuario, s -> s));
 
         List<RankingItemDTO> rankingDTOs = new ArrayList<>();
         int posicion = 1;
