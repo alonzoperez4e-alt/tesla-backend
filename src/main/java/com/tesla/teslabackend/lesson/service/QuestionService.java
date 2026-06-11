@@ -7,7 +7,7 @@ import com.tesla.teslabackend.lesson.repository.AlternativaRepository;
 import com.tesla.teslabackend.lesson.repository.LeccionRepository;
 import com.tesla.teslabackend.lesson.repository.PreguntaRepository;
 import com.tesla.teslabackend.lesson.dto.CrearPreguntaDTO;
-import com.tesla.teslabackend.security.infrastructure.CloudinaryService; // Actualizado a la nueva ruta
+import com.tesla.teslabackend.security.infrastructure.S3Service; // <-- CAMBIADO A S3Service
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +24,7 @@ public class QuestionService {
     @Autowired private AlternativaRepository alternativaRepository;
     @Autowired private LeccionRepository leccionRepository;
 
-    @Autowired private CloudinaryService cloudinaryService;
+    @Autowired private S3Service s3Service; // <-- CAMBIADO A S3Service
 
     @Transactional
     public Pregunta crearPreguntaConAlternativas(CrearPreguntaDTO dto, MultipartFile imagenPregunta, MultipartFile imagenSolucion) {
@@ -41,20 +41,20 @@ public class QuestionService {
         pregunta.setSolucionTexto(dto.solucionTexto());
 
         try {
-            // 2. Subida de imágenes si existen
+            // 2. Subida de imágenes si existen (Ahora apuntando a S3)
             if (imagenPregunta != null && !imagenPregunta.isEmpty()) {
-                String urlPregunta = cloudinaryService.upload(imagenPregunta, "academia_tesla/preguntas");
+                String urlPregunta = s3Service.uploadFile(imagenPregunta, "academia_tesla/preguntas");
                 pregunta.setPreguntaImagenUrl(urlPregunta);
             }
 
             if (imagenSolucion != null && !imagenSolucion.isEmpty()) {
-                String urlSolucion = cloudinaryService.upload(imagenSolucion, "academia_tesla/soluciones");
+                String urlSolucion = s3Service.uploadFile(imagenSolucion, "academia_tesla/soluciones");
                 pregunta.setSolucionImagenUrl(urlSolucion);
             } else if (dto.solucionImagenUrl() != null) {
                 pregunta.setSolucionImagenUrl(dto.solucionImagenUrl());
             }
         } catch (IOException e) {
-            throw new RuntimeException("Error al subir las imágenes a Cloudinary", e);
+            throw new RuntimeException("Error al subir las imágenes a AWS S3", e); // <-- Mensaje actualizado
         }
 
         // 3. Guardar la pregunta en PostgreSQL

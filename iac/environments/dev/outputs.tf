@@ -15,3 +15,13 @@ output "dev_cognito_issuer_uri" {
 output "dev_cognito_user_pool_domain" {
   value = module.cognito.user_pool_domain
 }
+
+output "dev_s3_bucket_name" {
+  value       = module.storage.bucket_name
+  description = "Nombre del bucket S3 para application.properties"
+}
+
+output "dev_cloudfront_url" {
+  value       = module.storage.cloudfront_domain
+  description = "URL de CloudFront para application.properties"
+}

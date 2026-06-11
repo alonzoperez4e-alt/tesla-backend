@@ -5,3 +5,10 @@ module "cognito" {
   prefix = var.prefix
   allowed_callback_urls = var.allowed_callback_urls
 }
+
+module "storage" {
+  source = "../../modules/storage"
+
+  prefix      = var.prefix
+  environment = "qa"
+}
