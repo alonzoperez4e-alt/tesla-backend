@@ -39,7 +39,11 @@ public class RankingRedisService {
         log.info("Reconstruyendo ranking en Redis para la clave: {}", clave);
         List<Object[]> agregados = intentoRepository.findExpAgregadaPorVentana(inicio, fin);
 
-        if (agregados.isEmpty()) return;
+        if (agregados.isEmpty()) {
+            redisTemplate.opsForZSet().add(clave, "-1", 0);
+            redisTemplate.expire(clave, 14, TimeUnit.DAYS);
+            return;
+        }
 
         for (Object[] row : agregados) {
             String idUsuarioStr = String.valueOf((Integer) row[0]);
