@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -17,6 +18,9 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -33,28 +37,32 @@ public class RankingCronTask {
             ZoneId zonaLima = ZoneId.of("America/Lima");
             ZonedDateTime ahora = ZonedDateTime.now(zonaLima);
 
-            // [inicio, fin) de la semana que acaba de cerrar
             ZonedDateTime fin = ahora.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
                     .toLocalDate().atStartOfDay(zonaLima);
             ZonedDateTime inicio = fin.minusWeeks(1);
 
-            LocalDate fechaFinSemana = fin.minusDays(1).toLocalDate(); // Domingo que cerró
+            LocalDate fechaFinSemana = fin.minusDays(1).toLocalDate();
             int mes = fechaFinSemana.getMonthValue();
             int anio = fechaFinSemana.getYear();
 
-            // 1. Agregación desde Aurora (Verdad Durable)
             List<Object[]> rankingAgregado = intentoRepository.findExpAgregadaPorVentana(inicio, fin);
+
+            Set<Integer> idsQuePuntuaron = rankingAgregado.stream()
+                    .map(f -> (Integer) f[0])
+                    .collect(Collectors.toSet());
+
+            Map<Integer, EstadisticasAlumno> statsMap = estadisticasRepository.findAllById(idsQuePuntuaron)
+                    .stream().collect(Collectors.toMap(s -> s.getUsuario().getIdUsuario(), s -> s));
 
             int posicionActual = 1;
             for (Object[] fila : rankingAgregado) {
                 Integer idUsuario = (Integer) fila[0];
-                Long expGanadaLong = (Long) fila[1];
-                Integer expObtenida = expGanadaLong.intValue();
+                // SOLUCIÓN: Math.toIntExact evita truncamientos silenciosos
+                Integer expObtenida = Math.toIntExact((Long) fila[1]);
 
-                EstadisticasAlumno stats = estadisticasRepository.findById(idUsuario).orElse(null);
+                EstadisticasAlumno stats = statsMap.get(idUsuario);
                 if (stats == null) continue;
 
-                // 2. UPSERT Idempotente en HistorialRanking (Constraint uq_historial protege de duplicados)
                 HistorialRanking registro = historialRepository
                         .findByFechaFinSemanaAndUsuarioIdUsuario(fechaFinSemana, idUsuario)
                         .orElseGet(() -> HistorialRanking.builder()
@@ -68,30 +76,26 @@ public class RankingCronTask {
                 registro.setPosicion(posicionActual);
                 historialRepository.save(registro);
 
-                // 3. Actualizar rankingAnterior
                 stats.setRankingAnterior(posicionActual);
-                estadisticasRepository.save(stats);
-
                 posicionActual++;
             }
 
-            // A los que no puntuaron esta semana, su rankingAnterior vuelve a 0
             List<EstadisticasAlumno> todos = estadisticasRepository.findAll();
             for (EstadisticasAlumno stats : todos) {
-                boolean puntuoEstaSemana = rankingAgregado.stream()
-                        .anyMatch(fila -> fila[0].equals(stats.getUsuario().getIdUsuario()));
+                boolean puntuoEstaSemana = idsQuePuntuaron.contains(stats.getIdUsuario());
 
                 if (!puntuoEstaSemana && (stats.getRankingAnterior() == null || stats.getRankingAnterior() != 0)) {
                     stats.setRankingAnterior(0);
-                    estadisticasRepository.save(stats);
                 }
             }
 
-            // ¡IMPORTANTE! Ya no reseteamos stats.setExpSemanal(0)
-            log.info("✅ Snapshot semanal materializado de forma segura. Top actual: {} usuarios.", rankingAgregado.size());
+            estadisticasRepository.saveAll(todos);
+
+            log.info("Snapshot semanal materializado de forma segura. Top actual: {} usuarios.", rankingAgregado.size());
 
         } catch (Exception e) {
-            log.error("Error al materializar el snapshot semanal: {}", e.getMessage(), e);
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            log.error("Error CRÍTICO al materializar el snapshot semanal. Transacción revertida.", e);
         }
     }
 }
