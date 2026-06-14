@@ -1,10 +1,12 @@
 package com.tesla.teslabackend.progress.controller;
 
 import com.tesla.teslabackend.progress.dto.HistorialRankingDTO;
+import com.tesla.teslabackend.progress.dto.RankingItemDTO;
 import com.tesla.teslabackend.progress.entity.EstadisticasAlumno;
 import com.tesla.teslabackend.progress.entity.HistorialRanking;
 import com.tesla.teslabackend.progress.repository.EstadisticasAlumnoRepository;
 import com.tesla.teslabackend.progress.repository.HistorialRankingRepository;
+import com.tesla.teslabackend.progress.service.RankingService;
 import com.tesla.teslabackend.user.component.IdentityExtractor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -29,68 +31,43 @@ public class RankingController {
     private HistorialRankingRepository historialRepository;
 
     @Autowired
-    private EstadisticasAlumnoRepository estadisticasRepository;
+    private RankingService rankingService;
 
+    @Autowired
     private IdentityExtractor identityExtractor;
 
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> obtenerRankingGeneral(@AuthenticationPrincipal Jwt jwt) {
         Integer userId = (jwt != null) ? identityExtractor.getUsuarioId(jwt) : null;
 
-        List<EstadisticasAlumno> todosLosAlumnos = estadisticasRepository.findAllByOrderByExpSemanalDesc();
+        List<RankingItemDTO> rankingDTOs = rankingService.obtenerRanking(userId);
         List<Map<String, Object>> respuesta = new ArrayList<>();
-        int posicion = 1;
 
-        for (EstadisticasAlumno alumno : todosLosAlumnos) {
-            Map<String, Object> dto = new HashMap<>();
-            dto.put("idUsuario", alumno.getUsuario().getIdUsuario());
-            dto.put("posicion", posicion);
-            dto.put("nombreCompleto", alumno.getUsuario().getNombre() + " " + alumno.getUsuario().getApellido());
+        for (RankingItemDTO dto : rankingDTOs) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("idUsuario", dto.getIdUsuario());
+            map.put("posicion", dto.getPosicionActual());
+            map.put("nombreCompleto", dto.getNombreCompleto());
 
-            int expSemanal = (alumno.getExpSemanal() != null) ? alumno.getExpSemanal() : 0;
-            dto.put("expParaRanking", expSemanal);
-            dto.put("expTotal", expSemanal);
-            dto.put("experiencia", expSemanal);
+            map.put("expParaRanking", dto.getExpTotal());
+            map.put("expTotal", dto.getExpTotal());
+            map.put("experiencia", dto.getExpTotal());
 
-            int rankAnt = (alumno.getRankingAnterior() != null) ? alumno.getRankingAnterior() : 0;
-            dto.put("rankingAnterior", rankAnt);
+            map.put("rankingAnterior", dto.getTendencia() + dto.getPosicionActual());
 
-            boolean esUsuarioActual = (userId != null && alumno.getUsuario().getIdUsuario().equals(userId));
-            dto.put("esUsuarioActual", esUsuarioActual);
+            map.put("esUsuarioActual", dto.isEsUsuarioActual());
+            map.put("inicial", dto.getInicial());
+            map.put("tendencia", dto.getTendencia());
 
-            respuesta.add(dto);
-            posicion++;
+            respuesta.add(map);
         }
+
         return ResponseEntity.ok(respuesta);
     }
 
     @GetMapping("/semanal")
     public ResponseEntity<List<Map<String, Object>>> obtenerRankingActual(@AuthenticationPrincipal Jwt jwt) {
-        Integer userId = (jwt != null) ? identityExtractor.getUsuarioId(jwt) : null;
-
-        List<EstadisticasAlumno> rankingActual = estadisticasRepository.findAllByOrderByExpSemanalDesc();
-        List<Map<String, Object>> respuesta = new ArrayList<>();
-        int posicion = 1;
-
-        for (EstadisticasAlumno alumno : rankingActual) {
-            if (alumno.getExpSemanal() != null) {
-                Map<String, Object> dto = new HashMap<>();
-                dto.put("idUsuario", alumno.getUsuario().getIdUsuario());
-                dto.put("posicion", posicion);
-                dto.put("nombreCompleto", alumno.getUsuario().getNombre() + " " + alumno.getUsuario().getApellido());
-                dto.put("expParaRanking", alumno.getExpSemanal());
-
-                int rankAnt = (alumno.getRankingAnterior() != null) ? alumno.getRankingAnterior() : 0;
-                dto.put("rankingAnterior", rankAnt);
-
-                boolean esUsuarioActual = (userId != null && alumno.getUsuario().getIdUsuario().equals(userId));
-                dto.put("esUsuarioActual", esUsuarioActual);
-
-                respuesta.add(dto);
-                posicion++;
-            }
-        }
-        return ResponseEntity.ok(respuesta);
+        return obtenerRankingGeneral(jwt);
     }
 
     @GetMapping("/historial")

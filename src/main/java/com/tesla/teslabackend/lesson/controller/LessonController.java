@@ -23,8 +23,8 @@ public class LessonController {
 
     @Autowired private LessonService lessonService;
     @Autowired private EvaluacionService evaluacionService;
+    @Autowired private IdentityExtractor identityExtractor;
 
-    private IdentityExtractor identityExtractor;
     // Antes: /api/v1/admin/lecciones
     // Ahora: POST /api/v1/lessons
     @PostMapping

@@ -10,14 +10,4 @@ import java.util.List;
 
 @Repository
 public interface EstadisticasAlumnoRepository extends JpaRepository<EstadisticasAlumno, Integer> {
-
-    @Query("SELECT e FROM EstadisticasAlumno e " +
-            "JOIN FETCH e.usuario u " +
-            "WHERE u.rol = 'alumno' " +
-            "ORDER BY e.expSemanal DESC")
-    List<EstadisticasAlumno> findAllByOrderByExpSemanalDesc();
-
-    @Modifying
-    @Query("UPDATE EstadisticasAlumno e SET e.expSemanal = 0")
-    void reiniciarExperienciaSemanal();
 }
