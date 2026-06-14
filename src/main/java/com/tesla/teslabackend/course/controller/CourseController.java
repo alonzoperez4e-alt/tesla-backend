@@ -22,6 +22,7 @@ public class CourseController {
     @Autowired
     private CourseService courseService;
 
+    @Autowired
     private IdentityExtractor indentityExtractor;
 
     // ==========================================

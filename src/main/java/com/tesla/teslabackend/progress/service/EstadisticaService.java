@@ -30,7 +30,6 @@ public class EstadisticaService {
                     .usuario(usuario)
                     .rachaActual(0)
                     .expTotal(0)
-                    .expSemanal(0) // Inicializado a 0
                     .estadoMascota("Huevo")
                     .ultimaFechaMision(LocalDate.now().minusDays(1))
                     .build();
@@ -61,7 +60,6 @@ public class EstadisticaService {
         }
 
         stats.setExpTotal((stats.getExpTotal() != null ? stats.getExpTotal() : 0) + puntosExp);
-        stats.setExpSemanal((stats.getExpSemanal() != null ? stats.getExpSemanal() : 0) + puntosExp);
 
         stats.setUltimaFechaMision(hoy);
         stats.calcularEstado();

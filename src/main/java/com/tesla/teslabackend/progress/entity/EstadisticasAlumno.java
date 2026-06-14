@@ -32,10 +32,6 @@ public class EstadisticasAlumno {
     @Column(name = "exp_total")
     private Integer expTotal;
 
-    @Column(name = "exp_semanal")
-    @Builder.Default
-    private Integer expSemanal = 0;
-
     @Column(name = "estado_mascota")
     private String estadoMascota;
 
@@ -47,9 +43,7 @@ public class EstadisticasAlumno {
 
     public void ganarExperiencia(int puntos) {
         if (puntos > 0) {
-            // Se usa el operador ternario para evitar NullPointerException si la BD tiene nulos
             this.expTotal = (this.expTotal == null ? 0 : this.expTotal) + puntos;
-            this.expSemanal = (this.expSemanal == null ? 0 : this.expSemanal) + puntos;
         }
     }
 
