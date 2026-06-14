@@ -32,7 +32,6 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 	<dependencies>
-
 		<dependency>
 			<groupId>com.cloudinary</groupId>
 			<artifactId>cloudinary-http44</artifactId>
@@ -65,20 +64,11 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
-
-
-		<!-- MANEJO DE ARCHIVOS EXCEL -->
-
-		<!-- Apache POI: Para leer archivos .xlsx (Carga masiva) -->
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
 			<version>5.2.3</version>
 		</dependency>
-
-		<!-- RECOMENDACIONES (Probablemente ya las tengas) -->
-
-		<!-- Lombok: Para @Data, @Builder, etc. -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -114,6 +104,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.projectreactor.netty</groupId>
+			<artifactId>reactor-netty</artifactId>
 		</dependency>
 	</dependencies>
 
