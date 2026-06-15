@@ -1,5 +1,9 @@
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "${var.prefix}-terraform-state-${data.aws_caller_identity.current.account_id}"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_s3_bucket_versioning" "terraform_state" {
@@ -28,5 +32,9 @@ resource "aws_dynamodb_table" "terraform_locks" {
   attribute {
     name = "LockID"
     type = "S"
+  }
+
+  lifecycle {
+    prevent_destroy = true
   }
 }
