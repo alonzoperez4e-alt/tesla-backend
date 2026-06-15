@@ -82,34 +82,49 @@ public class EvaluacionService {
         }
 
         // C. Cálculo de Puntos y Ranking
-        boolean esPrimerIntento = !intentoRepository.existsByUsuarioIdUsuarioAndLeccionIdLeccion(usuario.getIdUsuario(), leccion.getIdLeccion());
-        int expGanada = 0;
-        ZonedDateTime momentoIntento = ZonedDateTime.now(); // Capturamos el instante
+        int expGanadaPosible = respuestasCorrectas * 30;
+        ZonedDateTime momentoIntento = ZonedDateTime.now();
 
-        if (esPrimerIntento) {
-            expGanada = respuestasCorrectas * 30;
-            if (expGanada > 0) {
-                EstadisticasAlumno stats = estadisticasRepository.findById(usuario.getIdUsuario())
-                        .orElseGet(() -> {
-                            EstadisticasAlumno nueva = new EstadisticasAlumno();
-                            nueva.setUsuario(usuario);
-                            return nueva;
-                        });
+        // Intentamos insertar atómicamente el "primer intento" en la BD.
+        // Si devuelve 1 -> Fue exitoso, ganamos la carrera.
+        // Si devuelve 0 -> Hubo conflicto, otro hilo ya lo insertó (es un replay).
+        int filasInsertadas = intentoRepository.registrarPrimerIntentoIdempotente(
+                usuario.getIdUsuario(),
+                leccion.getIdLeccion(),
+                respuestasCorrectas,
+                expGanadaPosible,
+                momentoIntento
+        );
 
-                stats.ganarExperiencia(expGanada);
-                estadisticasRepository.save(stats);
-            }
-        }
+        boolean fuePrimerIntentoReal = (filasInsertadas > 0);
+        final int expGanadaFinal = fuePrimerIntentoReal ? expGanadaPosible : 0;
 
         // D. Registrar el Intento
-        Intento intento = new Intento();
-        intento.setUsuario(usuario);
-        intento.setLeccion(leccion);
-        intento.setPuntaje(respuestasCorrectas);
-        intento.setIsPrimerIntento(esPrimerIntento);
-        intento.setExpGanada(expGanada); // Nuevo campo fase 0
-        intento.setFecha(momentoIntento); // Nuevo tipo timestamptz fase 0
-        intentoRepository.save(intento);
+        if (!fuePrimerIntentoReal) {
+            // Es un replay. Guardamos un intento normal (is_primer_intento = false).
+            // Esto no viola el índice parcial, así que no abortará la transacción.
+            Intento replay = new Intento();
+            replay.setUsuario(usuario);
+            replay.setLeccion(leccion);
+            replay.setPuntaje(respuestasCorrectas);
+            replay.setIsPrimerIntento(false);
+            replay.setExpGanada(0);
+            replay.setFecha(momentoIntento);
+            intentoRepository.save(replay);
+        } else if (expGanadaFinal > 0) {
+            // Fuimos el primer intento genuino y el insert ya está en BD.
+            // Procedemos a sumar la EXP global y guardar estadísticas.
+            EstadisticasAlumno stats = estadisticasRepository.findById(usuario.getIdUsuario())
+                    .orElseGet(() -> {
+                        EstadisticasAlumno nueva = new EstadisticasAlumno();
+                        nueva.setUsuario(usuario);
+                        nueva.setExpTotal(0); // Aseguramos no-nulo
+                        return nueva;
+                    });
+
+            stats.ganarExperiencia(expGanadaFinal);
+            estadisticasRepository.save(stats);
+        }
 
         // E. Actualizar Progreso
         ProgresoLecciones progreso = progresoRepository.findById(new ProgresoLeccionesId(usuario.getIdUsuario(), leccion.getIdLeccion()))
@@ -128,18 +143,17 @@ public class EvaluacionService {
 
         progresoRepository.save(progreso);
 
-        if (expGanada > 0) {
-            final int expFinal = expGanada;
+        if (expGanadaFinal > 0) {
             org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
                     new org.springframework.transaction.support.TransactionSynchronization() {
                         @Override
                         public void afterCommit() {
-                            rankingRedisService.registrarExpSemanal(usuario.getIdUsuario(), expFinal, momentoIntento);
+                            rankingRedisService.registrarExpSemanal(usuario.getIdUsuario(), expGanadaFinal, momentoIntento);
                         }
                     }
             );
         }
 
-        return new ResultadoEvaluacionDTO(respuestasCorrectas, expGanada, true, feedbackList);
+        return new ResultadoEvaluacionDTO(respuestasCorrectas, expGanadaFinal, true, feedbackList);
     }
 }
