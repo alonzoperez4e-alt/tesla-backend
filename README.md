@@ -17,6 +17,8 @@ docker compose up -d
 ```
 
 ### 2. Desplegar DEV
+* Quitar la extensión `.example` de `terraform.tfvars.example`.
+
 * Inicializar y aplicar Terraform:
 ```bash
 cd iac/environments/dev
