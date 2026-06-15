@@ -1,4 +1,12 @@
 terraform {
+  backend "s3" {
+    bucket = "tesla-bootstrap-terraform-state-050608055215"
+    key    = "dev/terraform.tfstate"
+    region = "us-east-1"
+    dynamodb_table = "tesla-bootstrap-terraform-locks"
+    encrypt = true
+  }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -9,4 +17,12 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
+
+  default_tags {
+    tags = {
+      Environment = "dev"
+      Project     = "tesla-backend"
+      ManagedBy    = "Terraform"
+    }
+  }
 }

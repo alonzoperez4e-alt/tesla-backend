@@ -1,0 +1,3 @@
+aws_region = "us-east-1"
+prefix = "tesla-backend-dev"
+allowed_callback_urls = ["http://localhost:5173"]
