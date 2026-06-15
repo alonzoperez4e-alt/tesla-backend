@@ -17,14 +17,10 @@ public class QuestionController {
     @Autowired
     private QuestionService questionService;
 
-    // Actualizado: Ahora consume MULTIPART_FORM_DATA para aceptar imágenes
-    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @PreAuthorize("hasRole('administrador')")
     public ResponseEntity<Pregunta> crearPregunta(
-            @RequestPart("pregunta") CrearPreguntaDTO dto,
-            @RequestPart(value = "imagenPregunta", required = false) MultipartFile imagenPregunta,
-            @RequestPart(value = "imagenSolucion", required = false) MultipartFile imagenSolucion) {
+            @RequestPart("pregunta") CrearPreguntaDTO dto) {
 
-        return ResponseEntity.ok(questionService.crearPreguntaConAlternativas(dto, imagenPregunta, imagenSolucion));
+        return ResponseEntity.ok(questionService.crearPreguntaConAlternativas(dto));
     }
 }
