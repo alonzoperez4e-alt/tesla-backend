@@ -1,11 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "6.36.0"
-    }
-  }
-}
 resource "aws_subnet" "public" {
   count = length(var.public_subnets_cidr)
 
