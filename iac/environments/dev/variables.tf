@@ -1,3 +1,13 @@
+variable "project_name" {
+  description = "Nombre del proyecto"
+  type = string
+}
+
+variable "environment" {
+  description = "Entorno de despliegue (dev, qa, prod)"
+  type = string
+}
+
 variable "aws_region" {
   description = "Región de AWS donde se desplegarán los recursos"
   type        = string

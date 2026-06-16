@@ -1,6 +1,11 @@
-variable "prefix" {
-  description = "Prefijo para los nombres de los recursos"
-  type        = string
+variable "project_name" {
+  description = "Nombre del proyecto"
+  type = string
+}
+
+variable "environment" {
+  description = "Entorno de despliegue (dev, qa, prod)"
+  type = string
 }
 
 variable "vpc_cidr" {
