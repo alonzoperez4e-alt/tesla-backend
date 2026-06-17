@@ -16,3 +16,11 @@ module "networking" {
   private_subnets_cidr  = ["10.0.11.0/24", "10.0.12.0/24"]
   database_subnets_cidr = ["10.0.21.0/24", "10.0.22.0/24"]
 }
+
+module "security" {
+  source = "../../modules/security"
+
+  project_name = "tesla-backend"
+  environment = var.environment
+  vpc_id = module.networking.vpc_id
+}
