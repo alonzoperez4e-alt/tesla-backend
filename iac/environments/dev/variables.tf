@@ -22,3 +22,15 @@ variable "allowed_callback_urls" {
   description = "URLs permitidas para el redireccionamiento después del login"
   type        = list(string)
 }
+
+variable "db_username" {
+  description = "Usuario administrador de la base de datos"
+  type        = string
+  default     = "tesla_admin"
+}
+
+variable "db_password" {
+  description = "Contraseña de la base de datos (Inyectada por entorno)"
+  type        = string
+  sensitive   = true
+}
