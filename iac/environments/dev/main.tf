@@ -24,3 +24,18 @@ module "security" {
   environment = var.environment
   vpc_id = module.networking.vpc_id
 }
+
+module "database" {
+  source                     = "../../modules/database"
+  project_name               = "tesla-backend"
+  environment                = var.environment
+
+  database_subnet_group_name = module.networking.database_subnet_group_name
+  database_subnets           = module.networking.database_subnets
+
+  database_sg_id             = module.security.database_sg_id
+  redis_sg_id                = module.security.redis_sg_id
+
+  db_username                = var.db_username
+  db_password                = var.db_password
+}
