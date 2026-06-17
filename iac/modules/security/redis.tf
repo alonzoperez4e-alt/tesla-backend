@@ -1,4 +1,4 @@
-resource "aws_security_group" "database" {
+resource "aws_security_group" "redis" {
   name = "${var.project_name}-${var.environment}-redis-sg"
   description = "Permitir trafico entre ECS y redis"
   vpc_id = var.vpc_id
