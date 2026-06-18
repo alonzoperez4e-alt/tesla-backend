@@ -37,3 +37,13 @@ variable "ecs_sg_id" {
   description = "ID del grupo de seguridad para los servicios de ECS"
   type = string
 }
+
+variable "postgres_endpoint" {
+  description = "Endpoint de la base de datos PostgreSQL"
+  type = string
+}
+
+variable "redis_endpoint" {
+  description = "Endpoint de la base de datos Redis"
+  type = string
+}
