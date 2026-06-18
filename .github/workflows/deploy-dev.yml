@@ -20,7 +20,7 @@ jobs:
   deploy:
     name: Build & Deploy
     runs-on: ubuntu-latest
-    environment: develop
+    environment: dev
 
     steps:
       - name: checkout del codigo
