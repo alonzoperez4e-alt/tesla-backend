@@ -11,8 +11,40 @@ resource "aws_ecs_task_definition" "api" {
   container_definitions = jsonencode([
     {
       name = "backend"
-      image = "jmalloc/echo-server:latest" # placeholder para el health check
+      image = "jmalloc/echo-server:latest"
       essential = true
+
+      environment = [
+        {
+          name = "SPRING_PROFILES_ACTIVE"
+          value = var.environment
+        },
+        {
+          name = "COGNITO_ISSUER_URI"
+          value = var.cognito_issuer_uri
+        },
+        {
+          name = "DB_URL"
+          value = "jdbc:postgresql://${var.postgres_endpoint}/tesladb"
+        },
+        {
+          name = "DB_USER"
+          value = var.postgres_username
+        },
+        {
+          name = "DB_PASSWORD"
+          value = var.postgres_password
+        },
+        {
+          name = "REDIS_HOST"
+          value = var.redis_endpoint
+        },
+        {
+          name  = "REDIS_PORT"
+          value = "6379"
+        },
+      ]
+
       portMappings = [
         {
           containerPort = 8080
@@ -20,6 +52,7 @@ resource "aws_ecs_task_definition" "api" {
           protocol = "tcp"
         }
       ]
+
       logConfiguration = {
         logDriver = "awslogs"
         options = {
