@@ -8,6 +8,11 @@ variable "environment" {
   type = string
 }
 
+variable "aws_region" {
+  description = "Región de AWS donde se desplegarán los recursos"
+  type        = string
+}
+
 variable "vpc_id" {
   description = "ID de la VPC donde se desplegarán los recursos de cómputo"
   type = string
