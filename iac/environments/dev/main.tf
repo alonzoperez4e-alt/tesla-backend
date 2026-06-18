@@ -50,4 +50,8 @@ module "compute" {
   private_subnets = module.networking.private_subnets
   alb_sg_id = module.security.alb_sg_id
   ecs_sg_id = module.security.ecs_sg_id
+  postgres_endpoint = module.database.postgres_endpoint
+  postgres_username = var.db_username
+  redis_endpoint = module.database.redis_endpoint
+  cognito_issuer_uri = "https://cognito-idp.${var.aws_region}.amazonaws.com/${module.cognito.user_pool_id}"
 }
