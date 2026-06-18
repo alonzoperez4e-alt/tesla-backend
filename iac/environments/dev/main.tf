@@ -52,7 +52,6 @@ module "compute" {
   ecs_sg_id = module.security.ecs_sg_id
   postgres_endpoint = module.database.postgres_endpoint
   postgres_username = var.db_username
-  postgres_password = var.db_password
   redis_endpoint = module.database.redis_endpoint
   cognito_issuer_uri = "https://cognito-idp.${var.aws_region}.amazonaws.com/${module.cognito.user_pool_id}"
 }

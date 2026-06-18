@@ -32,10 +32,6 @@ resource "aws_ecs_task_definition" "api" {
           value = var.postgres_username
         },
         {
-          name = "DB_PASSWORD"
-          value = var.postgres_password
-        },
-        {
           name = "REDIS_HOST"
           value = var.redis_endpoint
         },

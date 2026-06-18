@@ -48,12 +48,6 @@ variable "postgres_username" {
   type = string
 }
 
-variable "postgres_password" {
-  description = "Contraseña para la base de datos PostgreSQL"
-  type      = string
-  sensitive = true
-}
-
 variable "redis_endpoint" {
   description = "Endpoint de la base de datos Redis"
   type = string
