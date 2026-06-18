@@ -3,3 +3,5 @@ prefix = "tesla-backend-dev"
 project_name = "tesla-backend"
 environment = "dev"
 allowed_callback_urls = ["http://localhost:5173"]
+db_username = "tesla_backend_user"
+db_password = ""
