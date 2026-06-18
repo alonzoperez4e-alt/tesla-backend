@@ -24,11 +24,11 @@ output "dev_redis_endpoint" {
   value = module.database.redis_endpoint
 }
 
-output "api_base_url" {
+output "dev_api_base_url" {
   description = "URL base del API a consumir desde el Frontend"
   value       = "http://${module.compute.alb_dns_name}"
 }
 
-output "ecr_repository_url" {
+output "dev_ecr_repository_url" {
   value = module.compute.ecr_repository_url
 }
