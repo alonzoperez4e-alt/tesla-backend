@@ -39,3 +39,15 @@ module "database" {
   db_username                = var.db_username
   db_password                = var.db_password
 }
+
+module "compute" {
+  source = "../../modules/compute"
+  project_name = "tesla-backend"
+  environment = var.environment
+  aws_region = var.aws_region
+  vpc_id = module.networking.vpc_id
+  public_subnets = module.networking.public_subnets
+  private_subnets = module.networking.private_subnets
+  alb_sg_id = module.security.alb_sg_id
+  ecs_sg_id = module.security.ecs_sg_id
+}
