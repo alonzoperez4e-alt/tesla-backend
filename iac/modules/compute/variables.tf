@@ -43,7 +43,23 @@ variable "postgres_endpoint" {
   type = string
 }
 
+variable "postgres_username" {
+  description = "Nombre de usuario para la base de datos PostgreSQL"
+  type = string
+}
+
+variable "postgres_password" {
+  description = "Contraseña para la base de datos PostgreSQL"
+  type      = string
+  sensitive = true
+}
+
 variable "redis_endpoint" {
   description = "Endpoint de la base de datos Redis"
+  type = string
+}
+
+variable "cognito_issuer_uri" {
+  description = "URI del issuer de Cognito para la autenticación JWT"
   type = string
 }
