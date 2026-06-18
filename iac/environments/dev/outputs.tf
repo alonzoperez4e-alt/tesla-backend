@@ -16,10 +16,19 @@ output "dev_cognito_user_pool_domain" {
   value = module.cognito.user_pool_domain
 }
 
-output "postgres_endpoint" {
+output "dev_postgres_endpoint" {
   value = module.database.postgres_endpoint
 }
 
-output "redis_endpoint" {
+output "dev_redis_endpoint" {
   value = module.database.redis_endpoint
+}
+
+output "api_base_url" {
+  description = "URL base del API a consumir desde el Frontend"
+  value       = "http://${module.compute.alb_dns_name}"
+}
+
+output "ecr_repository_url" {
+  value = module.compute.ecr_repository_url
 }
