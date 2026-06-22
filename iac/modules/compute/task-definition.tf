@@ -39,8 +39,9 @@ resource "aws_ecs_task_definition" "api" {
           name  = "REDIS_PORT"
           value = "6379"
         },
-        {name = "MQ_HOST"
-        value = replace(replace(var.mq_endpoint, "ampqs://", ""), ":5671", "")
+        {
+          name = "MQ_HOST"
+          value = replace(replace(var.mq_endpoint, "amqps://", ""), ":5671", "")
         },
         {
           name  = "MQ_PORT"
