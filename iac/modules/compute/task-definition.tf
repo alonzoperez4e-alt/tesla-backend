@@ -39,6 +39,17 @@ resource "aws_ecs_task_definition" "api" {
           name  = "REDIS_PORT"
           value = "6379"
         },
+        {name = "MQ_HOST"
+        value = replace(replace(var.mq_endpoint, "ampqs://", ""), ":5671", "")
+        },
+        {
+          name  = "MQ_PORT"
+          value = "61614"
+        },
+        {
+          name = "MQ_USERNAME"
+          value = var.mq_username
+        }
       ]
 
       portMappings = [
