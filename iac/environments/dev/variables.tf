@@ -34,3 +34,14 @@ variable "db_password" {
   type        = string
   sensitive   = true
 }
+
+variable "mq_username" {
+  description = "Usuario administrador del servicio de mensajería"
+  type        = string
+}
+
+variable "mq_password" {
+  description = "Contraseña del servicio de mensajería (Inyectada por entorno)"
+  type        = string
+  sensitive   = true
+}

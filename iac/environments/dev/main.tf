@@ -38,6 +38,10 @@ module "database" {
 
   db_username                = var.db_username
   db_password                = var.db_password
+
+  mq_sq_id                   = module.security.mq_sg_id
+  mq_username               = var.mq_username
+  mq_password               = var.mq_password
 }
 
 module "compute" {
