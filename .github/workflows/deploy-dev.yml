@@ -67,7 +67,9 @@ jobs:
           task-definition: task-definition.json
           container-name: backend
           image: ${{ steps.build-imagen.outputs.image }}
-          environment-variables: DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          environment-variables: | 
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            MQ_PASSWORD=${{ secrets.MQ_PASSWORD }}
 
       - name: desplegar nueva version en aws ecs
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
