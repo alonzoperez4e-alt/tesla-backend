@@ -3,9 +3,13 @@ package com.tesla.teslabackend.group.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.messaging.simp.stomp.StompReactorNettyCodec;
+import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import reactor.netty.tcp.SslProvider;
+import reactor.netty.tcp.TcpClient;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -34,12 +38,18 @@ public class GroupWebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.setApplicationDestinationPrefixes("/app");
 
+        TcpClient tcpClient = TcpClient.create()
+                .host(relayHost)
+                .port(Integer.parseInt(relayPort))
+                .secure(SslProvider.defaultClientProvider());
+
+        ReactorNettyTcpClient<byte[]> secureTcpClient = new ReactorNettyTcpClient<>(tcpClient, new StompReactorNettyCodec());
+
         registry.enableStompBrokerRelay("/topic")
-                .setRelayHost(relayHost)
-                .setRelayPort(Integer.parseInt(relayPort))
                 .setClientLogin(clientLogin)
                 .setClientPasscode(clientPasscode)
                 .setSystemLogin(clientLogin)
-                .setSystemPasscode(clientPasscode);
+                .setSystemPasscode(clientPasscode)
+                .setTcpClient(secureTcpClient);
     }
 }
