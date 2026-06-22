@@ -17,3 +17,8 @@ output "redis_sg_id" {
   description = "ID del Security Group para Redis"
   value = aws_security_group.redis.id
 }
+
+output "mq_sg_id" {
+  description = "ID del Security Group para MQ"
+  value = aws_security_group.mq.id
+}
