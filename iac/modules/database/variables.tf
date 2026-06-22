@@ -54,3 +54,8 @@ variable "mq_password" {
   type = string
   sensitive = true
 }
+
+variable "mq_endpoint" {
+  description = "Endpoint del servicio de mensajería"
+  type = string
+}
