@@ -38,3 +38,19 @@ variable "db_password" {
   type      = string
   sensitive = true
 }
+
+variable "mq_sq_id" {
+  description = "ID del grupo de seguridad para el servicio de mensajería"
+  type = string
+}
+
+variable "mq_username" {
+  description = "Nombre de usuario para el servicio de mensajería"
+  type = string
+}
+
+variable "mq_password" {
+  description = "Contraseña para el servicio de mensajería"
+  type = string
+  sensitive = true
+}
