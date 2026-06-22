@@ -4,6 +4,8 @@ resource "aws_mq_broker" "rabbitmq" {
   engine_version     = "4.2"
   host_instance_type = "mq.m7g.medium"
 
+  auto_minor_version_upgrade = true
+
   deployment_mode = var.environment == "prod" ? "ACTIVE_STANDBY_MULTI_AZ" : "SINGLE_INSTANCE"
 
   publicly_accessible = false
