@@ -38,6 +38,10 @@ module "database" {
 
   db_username                = var.db_username
   db_password                = var.db_password
+
+  mq_sq_id                   = module.security.mq_sg_id
+  mq_username               = var.mq_username
+  mq_password               = var.mq_password
 }
 
 module "compute" {
@@ -54,4 +58,6 @@ module "compute" {
   postgres_username = var.db_username
   redis_endpoint = module.database.redis_endpoint
   cognito_issuer_uri = "https://cognito-idp.${var.aws_region}.amazonaws.com/${module.cognito.user_pool_id}"
+  mq_endpoint = module.database.mq_endpoint
+  mq_username = var.mq_username
 }

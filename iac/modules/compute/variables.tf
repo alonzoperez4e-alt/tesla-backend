@@ -57,3 +57,13 @@ variable "cognito_issuer_uri" {
   description = "URI del issuer de Cognito para la autenticación JWT"
   type = string
 }
+
+variable "mq_username" {
+  description = "Nombre de usuario para el servicio de mensajería"
+  type = string
+}
+
+variable "mq_endpoint" {
+  description = "Endpoint del servicio de mensajería"
+  type = string
+}
