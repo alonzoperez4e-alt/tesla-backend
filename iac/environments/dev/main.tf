@@ -61,3 +61,10 @@ module "compute" {
   mq_endpoint = module.database.mq_endpoint
   mq_username = var.mq_username
 }
+
+module "edge" {
+  source = "../../modules/edge"
+  project_name = "tesla-backend"
+  environment = var.environment
+  alb_dns_name = module.compute.alb_dns_name
+}
