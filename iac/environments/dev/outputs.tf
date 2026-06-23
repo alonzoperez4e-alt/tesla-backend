@@ -32,3 +32,12 @@ output "dev_api_base_url" {
 output "dev_ecr_repository_url" {
   value = module.compute.ecr_repository_url
 }
+
+output "dev_aplicacion_url" {
+  description = "URL publica de la aplicacion (CDN)"
+  value       = "https://${module.edge.cloudfront_domain_name}"
+}
+
+output "dev_s3_frontend_bucket" {
+  value = module.edge.frontend_bucket_name
+}
