@@ -45,3 +45,8 @@ variable "mq_password" {
   type        = string
   sensitive   = true
 }
+
+variable "alb_secret_token" {
+  description = "Token para validar que el trafico viene de CloudFront"
+  type        = string
+}

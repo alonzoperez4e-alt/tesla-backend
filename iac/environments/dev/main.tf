@@ -60,6 +60,7 @@ module "compute" {
   cognito_issuer_uri = "https://cognito-idp.${var.aws_region}.amazonaws.com/${module.cognito.user_pool_id}"
   mq_endpoint = module.database.mq_endpoint
   mq_username = var.mq_username
+  alb_secret_token = var.alb_secret_token
 }
 
 module "edge" {
@@ -67,4 +68,5 @@ module "edge" {
   project_name = "tesla-backend"
   environment = var.environment
   alb_dns_name = module.compute.alb_dns_name
+  alb_secret_token = var.alb_secret_token
 }

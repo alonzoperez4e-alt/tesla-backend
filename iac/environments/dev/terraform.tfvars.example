@@ -5,3 +5,6 @@ environment = "dev"
 allowed_callback_urls = ["http://localhost:5173"]
 db_username = "tesla_backend_user"
 db_password = ""
+mq_username = "tesla_mq_user"
+mq_password = ""
+alb_secret_token = "tesla-dev-super-secret-token"
