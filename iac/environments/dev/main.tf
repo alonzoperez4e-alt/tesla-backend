@@ -3,7 +3,7 @@ module "cognito" {
 
   aws_region = var.aws_region
   prefix = var.prefix
-  allowed_callback_urls = var.allowed_callback_urls
+  allowed_callback_urls = concat(var.allowed_callback_urls, ["https://${module.edge.cloudfront_domain_name}/callback"])
 }
 
 module "networking" {
