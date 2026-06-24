@@ -27,6 +27,11 @@ resource "aws_cloudfront_distribution" "cdn" {
       origin_protocol_policy = "http-only" # para pruebas
       origin_ssl_protocols = ["TLSv1.2"]
     }
+
+    custom_header {
+      name  = "X-Tesla-Origin-Token"
+      value = var.alb_secret_token
+    }
   }
 
   default_cache_behavior {
