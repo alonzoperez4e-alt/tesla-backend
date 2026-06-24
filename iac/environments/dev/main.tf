@@ -3,7 +3,7 @@ module "cognito" {
 
   aws_region = var.aws_region
   prefix = var.prefix
-  allowed_callback_urls = var.allowed_callback_urls
+  allowed_callback_urls = concat(var.allowed_callback_urls, ["https://${module.edge.cloudfront_domain_name}/callback"])
 }
 
 module "networking" {
@@ -60,4 +60,13 @@ module "compute" {
   cognito_issuer_uri = "https://cognito-idp.${var.aws_region}.amazonaws.com/${module.cognito.user_pool_id}"
   mq_endpoint = module.database.mq_endpoint
   mq_username = var.mq_username
+  alb_secret_token = var.alb_secret_token
+}
+
+module "edge" {
+  source = "../../modules/edge"
+  project_name = "tesla-backend"
+  environment = var.environment
+  alb_dns_name = module.compute.alb_dns_name
+  alb_secret_token = var.alb_secret_token
 }

@@ -29,7 +29,28 @@ resource "aws_lb_listener" "api" {
   protocol = "HTTP"
 
   default_action {
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Access Denied: Direct ALB access not allowed"
+      status_code  = "403"
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "api_allow_cloudfront" {
+  listener_arn = aws_lb_listener.api.arn
+  priority = 100
+
+  action {
     type = "forward"
     target_group_arn = aws_lb_target_group.api.arn
+  }
+
+  condition {
+    http_header {
+      http_header_name = "X-Tesla-Origin-Token"
+      values = [var.alb_secret_token]
+    }
   }
 }

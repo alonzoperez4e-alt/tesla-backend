@@ -67,3 +67,8 @@ variable "mq_endpoint" {
   description = "Endpoint del servicio de mensajería"
   type = string
 }
+
+variable "alb_secret_token" {
+  description = "Token secreto para validar la conexion entre CloudFront y el ALB"
+  type = string
+}
