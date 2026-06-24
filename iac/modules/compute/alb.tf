@@ -1,11 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "6.36.0"
-    }
-  }
-}
 resource "aws_lb" "api" {
   name = "${var.project_name}-${var.environment}-alb"
   internal = false
