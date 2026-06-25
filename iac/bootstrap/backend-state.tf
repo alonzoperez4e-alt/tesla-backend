@@ -37,4 +37,8 @@ resource "aws_dynamodb_table" "terraform_locks" {
   lifecycle {
     prevent_destroy = true
   }
+
+  point_in_time_recovery {
+    enabled = true
+  }
 }
