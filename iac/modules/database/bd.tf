@@ -14,6 +14,8 @@ resource "aws_db_instance" "postgres" {
 
   skip_final_snapshot    = var.environment != "prod" ? true : false
   publicly_accessible    = false
+
+  deletion_protection    = var.environment == "prod" ? true : false
   
   tags = {
     Name = "${var.project_name}-${var.environment}-postgres"
