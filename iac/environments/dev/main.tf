@@ -35,6 +35,7 @@ module "database" {
 
   database_sg_id             = module.security.database_sg_id
   redis_sg_id                = module.security.redis_sg_id
+  cache_retention_days       = var.cache_retention_days
 
   db_username                = var.db_username
   db_password                = var.db_password

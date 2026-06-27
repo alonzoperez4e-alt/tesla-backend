@@ -8,3 +8,4 @@ db_password = ""
 mq_username = "tesla_mq_user"
 mq_password = ""
 alb_secret_token = "tesla-dev-super-secret-token"
+cache_retention_days = 1

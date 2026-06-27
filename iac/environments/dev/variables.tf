@@ -50,3 +50,8 @@ variable "alb_secret_token" {
   description = "Token para validar que el trafico viene de CloudFront"
   type        = string
 }
+
+variable "cache_retention_days" {
+  description = "Número de días que los datos se mantendrán en caché"
+  type        = number
+}
