@@ -17,7 +17,9 @@ resource "aws_db_instance" "postgres" {
   storage_encrypted      = true
 
   deletion_protection    = var.environment == "prod" ? true : false
-  
+
+  auto_minor_version_upgrade = true
+
   tags = {
     Name = "${var.project_name}-${var.environment}-postgres"
   }
