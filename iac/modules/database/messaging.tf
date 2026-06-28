@@ -18,6 +18,10 @@ resource "aws_mq_broker" "rabbitmq" {
     username = var.mq_username
   }
 
+  logs {
+    general = true
+  }
+
   tags = {
     Name = "${var.project_name}-${var.environment}-mq"
   }
