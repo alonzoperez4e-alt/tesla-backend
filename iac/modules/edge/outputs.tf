@@ -7,3 +7,8 @@ output "frontend_bucket_name" {
   description = "Nombre del bucket S3 para hacer despliegues del frontend"
   value       = aws_s3_bucket.frontend.id
 }
+
+output "images_bucket_name" {
+  description = "Nombre del bucket S3 para almacenamiento de imagenes"
+  value       = aws_s3_bucket.images.id
+}

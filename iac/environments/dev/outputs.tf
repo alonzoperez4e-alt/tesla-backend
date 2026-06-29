@@ -41,3 +41,7 @@ output "dev_aplicacion_url" {
 output "dev_s3_frontend_bucket" {
   value = module.edge.frontend_bucket_name
 }
+
+output "dev_s3_images_bucket" {
+  value = module.edge.images_bucket_name
+}
