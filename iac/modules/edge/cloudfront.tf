@@ -85,7 +85,8 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true # para pruebas
+    # checkov:skip=CKV2_AWS_42: Se utiliza el certificado por defecto ya que no se cuenta con un dominio propio.
+    cloudfront_default_certificate = true
   }
 
   tags = {
