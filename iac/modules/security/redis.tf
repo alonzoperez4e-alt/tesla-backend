@@ -3,23 +3,17 @@ resource "aws_security_group" "redis" {
   description = "Permitir trafico entre ECS y redis"
   vpc_id      = var.vpc_id
 
-  ingress {
-    description     = "Permite trafico Redis desde las tareas ECS"
-    from_port       = 6379
-    to_port         = 6379
-    protocol        = "tcp"
-    security_groups = [aws_security_group.ecs_tasks.id]
-  }
-
-  egress {
-    description = "Permite todo el trafico saliente"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   tags = {
     Name = "${var.project_name}-${var.environment}-redis-sg"
   }
+}
+
+resource "aws_security_group_rule" "redis_ingress_ecs" {
+  description              = "Permite trafico Redis entrante desde las tareas ECS"
+  type                     = "ingress"
+  from_port                = 6379
+  to_port                  = 6379
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.redis.id
+  source_security_group_id = aws_security_group.ecs_tasks.id
 }

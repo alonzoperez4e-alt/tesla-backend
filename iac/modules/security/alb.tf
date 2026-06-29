@@ -3,23 +3,27 @@ resource "aws_security_group" "alb" {
   description = "Permite trafico HTTP/HTTPS solo desde CloudFront"
   vpc_id      = var.vpc_id
 
-  ingress {
-    description     = "Permite trafico HTTP desde CloudFront"
-    from_port       = 80
-    to_port         = 80
-    protocol        = "tcp"
-    prefix_list_ids = [data.aws_ec2_managed_prefix_list.cloudfront.id]
-  }
-
-  egress {
-    description = "Permite todo el trafico saliente"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   tags = {
     Name = "${var.project_name}-${var.environment}-alb-sg"
   }
+}
+
+resource "aws_security_group_rule" "alb_ingress_cloudfront" {
+  description       = "Permite trafico HTTP entrante desde CloudFront"
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  security_group_id = aws_security_group.alb.id
+  prefix_list_ids   = [data.aws_ec2_managed_prefix_list.cloudfront.id]
+}
+
+resource "aws_security_group_rule" "alb_egress_ecs" {
+  description              = "Permite trafico saliente del ALB hacia ECS en puerto 8080"
+  type                     = "egress"
+  from_port                = 8080
+  to_port                  = 8080
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.alb.id
+  source_security_group_id = aws_security_group.ecs_tasks.id
 }
