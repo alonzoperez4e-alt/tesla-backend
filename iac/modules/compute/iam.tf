@@ -33,12 +33,15 @@ resource "aws_iam_role_policy" "ecs_task_s3" {
       {
         Effect = "Allow"
         Action = [
-          "s3:GetObject",
           "s3:PutObject",
+          "s3:GetObject",
           "s3:DeleteObject",
           "s3:ListBucket"
         ]
-        Resource = "*"
+        Resource = [
+          "arn:aws:s3:::${var.project_name}-storage-${var.environment}",
+          "arn:aws:s3:::${var.project_name}-storage-${var.environment}/*"
+        ]
       }
     ]
   })
