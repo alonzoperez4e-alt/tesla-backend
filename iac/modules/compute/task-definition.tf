@@ -50,6 +50,14 @@ resource "aws_ecs_task_definition" "api" {
         {
           name = "MQ_USERNAME"
           value = var.mq_username
+        },
+        {
+          name  = "S3_IMAGE_BUCKET_NAME"
+          value = var.s3_images_bucket_name
+        },
+        {
+          name  = "CLOUDFRONT_STORAGE_URL"
+          value = var.cloudfront_domain_name
         }
       ]
 

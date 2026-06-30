@@ -61,6 +61,8 @@ module "compute" {
   mq_endpoint = module.database.mq_endpoint
   mq_username = var.mq_username
   alb_secret_token = var.alb_secret_token
+  s3_images_bucket_name = module.edge.images_bucket_name
+  cloudfront_domain_name = "https://${module.edge.cloudfront_domain_name}/storage"
 }
 
 module "edge" {
