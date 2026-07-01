@@ -4,8 +4,8 @@ output "postgres_endpoint" {
 }
 
 output "redis_endpoint" {
-  description = "Endpoint de conexión para Redis"
-  value       = aws_elasticache_cluster.redis.cache_nodes[0].address
+  description = "Endpoint de conexión para Redis (primary del replication group)"
+  value       = aws_elasticache_replication_group.redis.primary_endpoint_address
 }
 
 output "mq_endpoint" {
@@ -18,7 +18,7 @@ output "postgres_instance_id" {
   value       = aws_db_instance.postgres.id
 }
 
-output "redis_cluster_id" {
-  description = "Cluster ID de ElastiCache Redis, usado en las dimensiones de las alarmas de CloudWatch"
-  value       = aws_elasticache_cluster.redis.cluster_id
+output "redis_replication_group_id" {
+  description = "Replication Group ID de ElastiCache Redis, usado en las dimensiones de las alarmas de CloudWatch"
+  value       = aws_elasticache_replication_group.redis.replication_group_id
 }

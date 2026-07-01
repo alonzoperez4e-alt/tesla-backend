@@ -50,7 +50,7 @@ variable "rds_max_connections_threshold" {
   default     = 80
 }
 
-variable "redis_cluster_id" {
-  description = "Cluster ID de ElastiCache Redis"
+variable "redis_replication_group_id" {
+  description = "Replication Group ID de ElastiCache Redis"
   type        = string
 }

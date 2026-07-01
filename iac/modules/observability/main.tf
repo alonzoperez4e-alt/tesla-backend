@@ -123,7 +123,7 @@ resource "aws_cloudwatch_metric_alarm" "redis_cpu" {
   treat_missing_data  = "notBreaching"
 
   dimensions = {
-    CacheClusterId = var.redis_cluster_id
+    ReplicationGroupId = var.redis_replication_group_id
   }
 
   alarm_actions = [aws_sns_topic.alerts.arn]
@@ -143,7 +143,7 @@ resource "aws_cloudwatch_metric_alarm" "redis_evictions" {
   treat_missing_data  = "notBreaching"
 
   dimensions = {
-    CacheClusterId = var.redis_cluster_id
+    ReplicationGroupId = var.redis_replication_group_id
   }
 
   alarm_actions = [aws_sns_topic.alerts.arn]
