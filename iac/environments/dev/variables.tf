@@ -54,4 +54,8 @@ variable "alb_secret_token" {
 variable "cache_retention_days" {
   description = "Número de días que los datos se mantendrán en caché"
   type        = number
+variable "cloudfront_secret_header" {
+  description = "Valor secreto que CloudFront inyecta y el ALB valida."
+  type        = string
+  sensitive   = true
 }

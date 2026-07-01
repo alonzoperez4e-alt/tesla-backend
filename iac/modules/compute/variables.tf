@@ -72,3 +72,13 @@ variable "alb_secret_token" {
   description = "Token secreto para validar la conexion entre CloudFront y el ALB"
   type = string
 }
+
+variable "s3_images_bucket_name" {
+  description = "Nombre del bucket S3 para almacenamiento de imágenes"
+  type = string
+}
+
+variable "cloudfront_domain_name" {
+  description = "Nombre de dominio de CloudFront para la distribución de contenido"
+  type = string
+}

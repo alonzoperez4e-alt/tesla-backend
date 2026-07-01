@@ -62,12 +62,14 @@ module "compute" {
   mq_endpoint = module.database.mq_endpoint
   mq_username = var.mq_username
   alb_secret_token = var.alb_secret_token
+  s3_images_bucket_name = module.edge.images_bucket_name
+  cloudfront_domain_name = "https://${module.edge.cloudfront_domain_name}/storage"
 }
 
 module "edge" {
-  source = "../../modules/edge"
-  project_name = "tesla-backend"
-  environment = var.environment
-  alb_dns_name = module.compute.alb_dns_name
-  alb_secret_token = var.alb_secret_token
+  source           = "../../modules/edge"
+  project_name     = var.project_name
+  environment      = var.environment
+  alb_dns_name     = module.compute.alb_dns_name
+  alb_secret_token = var.cloudfront_secret_header
 }
