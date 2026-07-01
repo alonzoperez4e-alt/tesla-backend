@@ -67,7 +67,6 @@ module "compute" {
 }
 
 module "edge" {
-<<<<<<< HEAD
   source = "../../modules/edge"
   project_name = "tesla-backend"
   environment = var.environment
@@ -91,11 +90,4 @@ module "observability" {
 
   postgres_instance_id = module.database.postgres_instance_id
   redis_replication_group_id = module.database.redis_replication_group_id
-=======
-  source           = "../../modules/edge"
-  project_name     = var.project_name
-  environment      = var.environment
-  alb_dns_name     = module.compute.alb_dns_name
-  alb_secret_token = var.cloudfront_secret_header
->>>>>>> origin/develop
 }
