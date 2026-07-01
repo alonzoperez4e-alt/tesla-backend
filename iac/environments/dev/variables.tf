@@ -54,9 +54,18 @@ variable "alb_secret_token" {
 variable "cache_retention_days" {
   description = "Número de días que los datos se mantendrán en caché"
   type        = number
+<<<<<<< HEAD
 }
 
 variable "alert_emails" {
   description = "Emails del equipo que recibirán las alertas de CloudWatch vía SNS"
   type        = list(string)
+=======
+
+}
+variable "cloudfront_secret_header" {
+  description = "Valor secreto que CloudFront inyecta y el ALB valida."
+  type        = string
+  sensitive   = true
+>>>>>>> origin/develop
 }

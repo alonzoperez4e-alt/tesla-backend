@@ -62,9 +62,12 @@ module "compute" {
   mq_endpoint = module.database.mq_endpoint
   mq_username = var.mq_username
   alb_secret_token = var.alb_secret_token
+  s3_images_bucket_name = module.edge.images_bucket_name
+  cloudfront_domain_name = "https://${module.edge.cloudfront_domain_name}/storage"
 }
 
 module "edge" {
+<<<<<<< HEAD
   source = "../../modules/edge"
   project_name = "tesla-backend"
   environment = var.environment
@@ -88,4 +91,11 @@ module "observability" {
 
   postgres_instance_id = module.database.postgres_instance_id
   redis_replication_group_id = module.database.redis_replication_group_id
+=======
+  source           = "../../modules/edge"
+  project_name     = var.project_name
+  environment      = var.environment
+  alb_dns_name     = module.compute.alb_dns_name
+  alb_secret_token = var.cloudfront_secret_header
+>>>>>>> origin/develop
 }
