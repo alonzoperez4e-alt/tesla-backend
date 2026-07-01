@@ -50,3 +50,9 @@ variable "alb_secret_token" {
   description = "Token para validar que el trafico viene de CloudFront"
   type        = string
 }
+
+variable "cloudfront_secret_header" {
+  description = "Valor secreto que CloudFront inyecta y el ALB valida."
+  type        = string
+  sensitive   = true
+}
