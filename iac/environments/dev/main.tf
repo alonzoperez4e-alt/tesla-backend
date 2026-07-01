@@ -66,9 +66,9 @@ module "compute" {
 }
 
 module "edge" {
-  source = "../../modules/edge"
-  project_name = "tesla-backend"
-  environment = var.environment
-  alb_dns_name = module.compute.alb_dns_name
-  alb_secret_token = var.alb_secret_token
+  source           = "../../modules/edge"
+  project_name     = var.project_name
+  environment      = var.environment
+  alb_dns_name     = module.compute.alb_dns_name
+  alb_secret_token = var.cloudfront_secret_header
 }
