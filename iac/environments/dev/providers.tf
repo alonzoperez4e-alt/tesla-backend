@@ -1,10 +1,10 @@
 terraform {
   backend "s3" {
-    bucket = "tesla-bootstrap-terraform-state-382876615060"
-    key    = "dev/terraform.tfstate"
-    region = "us-east-1"
+    bucket         = "tesla-bootstrap-terraform-state-382876615060"
+    key            = "dev/terraform.tfstate"
+    region         = "us-east-1"
     dynamodb_table = "tesla-bootstrap-terraform-locks"
-    encrypt = true
+    encrypt        = true
   }
 
   required_providers {
@@ -22,7 +22,7 @@ provider "aws" {
     tags = {
       Environment = "dev"
       Project     = "tesla-backend"
-      ManagedBy    = "Terraform"
+      ManagedBy   = "Terraform"
     }
   }
 }
