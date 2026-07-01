@@ -2,6 +2,9 @@ resource "aws_lb" "api" {
   name               = "${var.project_name}-${var.environment}-alb"
   internal           = false
   load_balancer_type = "application"
+  security_groups = [var.alb_sg_id]
+  subnets = var.public_subnets
+  drop_invalid_header_fields = true
   security_groups    = [var.alb_sg_id]
   subnets            = var.public_subnets
   idle_timeout = 300

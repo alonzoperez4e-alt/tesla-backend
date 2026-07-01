@@ -28,6 +28,11 @@ variable "redis_sg_id" {
   type = string
 }
 
+variable "cache_retention_days" {
+  description = "Número de días que los datos se mantendrán en caché"
+  type        = number
+}
+
 variable "db_username" {
   description = "Nombre de usuario para la base de datos"
   type = string

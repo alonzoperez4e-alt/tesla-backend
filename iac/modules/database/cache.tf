@@ -15,6 +15,8 @@ resource "aws_elasticache_cluster" "redis" {
   subnet_group_name    = aws_elasticache_subnet_group.redis.name
   security_group_ids   = [var.redis_sg_id]
 
+  snapshot_retention_limit = var.cache_retention_days
+
   tags = {
     Name = "${var.project_name}-${var.environment}-redis"
   }
