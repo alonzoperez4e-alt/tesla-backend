@@ -67,9 +67,27 @@ module "compute" {
 }
 
 module "edge" {
-  source           = "../../modules/edge"
-  project_name     = var.project_name
-  environment      = var.environment
-  alb_dns_name     = module.compute.alb_dns_name
-  alb_secret_token = var.cloudfront_secret_header
+  source = "../../modules/edge"
+  project_name = "tesla-backend"
+  environment = var.environment
+  alb_dns_name = module.compute.alb_dns_name
+  alb_secret_token = var.alb_secret_token
+}
+
+module "observability" {
+  source = "../../modules/observability"
+
+  project_name = "tesla-backend"
+  environment  = var.environment
+
+  alert_emails = var.alert_emails
+
+  ecs_cluster_name         = module.compute.ecs_cluster_name
+  ecs_service_name         = module.compute.ecs_service_name
+  alb_arn_suffix           = module.compute.alb_arn_suffix
+  target_group_arn_suffix  = module.compute.target_group_arn_suffix
+  desired_task_count       = 1
+
+  postgres_instance_id = module.database.postgres_instance_id
+  redis_replication_group_id = module.database.redis_replication_group_id
 }

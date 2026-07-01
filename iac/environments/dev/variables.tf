@@ -1,11 +1,11 @@
 variable "project_name" {
   description = "Nombre del proyecto"
-  type = string
+  type        = string
 }
 
 variable "environment" {
   description = "Entorno de despliegue (dev, qa, prod)"
-  type = string
+  type        = string
 }
 
 variable "aws_region" {
@@ -54,10 +54,9 @@ variable "alb_secret_token" {
 variable "cache_retention_days" {
   description = "Número de días que los datos se mantendrán en caché"
   type        = number
-
 }
-variable "cloudfront_secret_header" {
-  description = "Valor secreto que CloudFront inyecta y el ALB valida."
-  type        = string
-  sensitive   = true
+
+variable "alert_emails" {
+  description = "Emails del equipo que recibirán las alertas de CloudWatch vía SNS"
+  type        = list(string)
 }
