@@ -16,3 +16,12 @@ resource "aws_security_group_rule" "mq_ingress_ecs" {
   security_group_id        = aws_security_group.mq.id
   source_security_group_id = aws_security_group.ecs_tasks.id
 }
+
+resource "aws_security_group_rule" "mq_ingress_ecs_stomp" {
+  type                     = "ingress"
+  from_port                = 61614
+  to_port                  = 61614
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.mq.id
+  source_security_group_id = aws_security_group.ecs_tasks.id
+}
