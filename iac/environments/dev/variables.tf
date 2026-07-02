@@ -56,6 +56,12 @@ variable "cache_retention_days" {
   type        = number
 }
 
+variable "cloudfront_secret_header" {
+  description = "Valor secreto que CloudFront inyecta y el ALB valida."
+  type        = string
+  sensitive   = true
+}
+
 variable "alert_emails" {
   description = "Emails del equipo que recibirán las alertas de CloudWatch vía SNS"
   type        = list(string)
