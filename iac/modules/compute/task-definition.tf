@@ -25,6 +25,10 @@ resource "aws_ecs_task_definition" "api" {
 
       environment = [
         {
+          name  = "SERVER_TOMCAT_BASEDIR"
+          value = "/tmp"
+        },
+        {
           name  = "SPRING_PROFILES_ACTIVE"
           value = var.environment
         },
