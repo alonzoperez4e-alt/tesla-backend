@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "tesla-bootstrap-terraform-state-382876615060"
+    bucket = "tesla-bootstrap-terraform-state-050608055215"
     key    = "dev/terraform.tfstate"
     region = "us-east-1"
     dynamodb_table = "tesla-bootstrap-terraform-locks"
