@@ -18,7 +18,7 @@ resource "aws_ecs_task_definition" "api" {
       mountPoints = [
         {
           sourceVolume  = "tomcat-tmp"
-          containerPath = "/tmp"
+          containerPath = "/tmp/tomcat"
           readOnly      = false
         }
       ]
