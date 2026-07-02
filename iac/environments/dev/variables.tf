@@ -1,11 +1,11 @@
 variable "project_name" {
   description = "Nombre del proyecto"
-  type = string
+  type        = string
 }
 
 variable "environment" {
   description = "Entorno de despliegue (dev, qa, prod)"
-  type = string
+  type        = string
 }
 
 variable "aws_region" {
@@ -60,4 +60,10 @@ variable "cloudfront_secret_header" {
   description = "Valor secreto que CloudFront inyecta y el ALB valida."
   type        = string
   sensitive   = true
+}
+
+variable "allowed_image_origins" {
+  description = "Orígenes adicionales autorizados para subir imágenes vía presigned PUT al bucket de storage."
+  type        = list(string)
+  default     = []
 }

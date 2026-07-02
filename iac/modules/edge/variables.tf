@@ -17,3 +17,10 @@ variable "alb_secret_token" {
   description = "Token secreto para validar la conexion entre CloudFront y el ALB"
   type = string
 }
+
+variable "allowed_image_origins" {
+  description = <<-EOT
+  EOT
+  type        = list(string)
+  default     = []
+}
