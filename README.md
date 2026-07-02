@@ -39,7 +39,9 @@ Debes desplegar el entorno `dev` en AWS para obtener el proveedor de identidad (
 cd iac/environments/dev
 cp terraform.tfvars.example terraform.tfvars
 # Edita terraform.tfvars con contraseñas seguras y tus datos
-terraform init
+cp backend.tfvars.example backend.tfvars
+# Edita backend.tfvars con el bucket S3 y la tabla DynamoDB creados por el módulo bootstrap
+terraform init -backend-config backend.tfvars
 terraform apply
 
 ```
