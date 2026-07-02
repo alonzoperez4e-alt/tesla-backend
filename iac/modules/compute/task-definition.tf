@@ -18,7 +18,7 @@ resource "aws_ecs_task_definition" "api" {
       mountPoints = [
         {
           sourceVolume  = "tomcat-tmp"
-          containerPath = "/tmp/tomcat"
+          containerPath = "/tmp"
           readOnly      = false
         }
       ]
@@ -47,10 +47,6 @@ resource "aws_ecs_task_definition" "api" {
       ]
 
       environment = [
-        {
-          name  = "SERVER_TOMCAT_BASEDIR"
-          value = "/tmp"
-        },
         {
           name  = "SPRING_PROFILES_ACTIVE"
           value = var.environment
