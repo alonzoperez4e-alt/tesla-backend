@@ -1,7 +1,9 @@
 package com.tesla.teslabackend.group.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompReactorNettyCodec;
 import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
@@ -13,7 +15,10 @@ import reactor.netty.tcp.TcpClient;
 
 @Configuration
 @EnableWebSocketMessageBroker
+@RequiredArgsConstructor
 public class GroupWebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    private final StompAuthChannelInterceptor stompAuthChannelInterceptor;
 
     @Value("${spring.rabbitmq.host}")
     private String relayHost;
@@ -32,6 +37,11 @@ public class GroupWebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws-chat")
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
+    }
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(stompAuthChannelInterceptor);
     }
 
     @Override
