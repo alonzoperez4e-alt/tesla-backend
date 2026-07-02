@@ -15,6 +15,14 @@ resource "aws_ecs_task_definition" "api" {
 
       readonlyRootFilesystem = true
 
+      mountPoints = [
+        {
+          sourceVolume  = "tomcat-tmp"
+          containerPath = "/tmp"
+          readOnly      = false
+        }
+      ]
+
       environment = [
         {
           name  = "SPRING_PROFILES_ACTIVE"
@@ -80,4 +88,8 @@ resource "aws_ecs_task_definition" "api" {
       }
     }
   ])
+
+  volume {
+    name = "tomcat-tmp"
+  }
 }
