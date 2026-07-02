@@ -9,11 +9,34 @@ resource "aws_ecs_task_definition" "api" {
 
   container_definitions = jsonencode([
     {
+      name      = "init-volume-permissions"
+      image     = "alpine:latest"
+      essential = false
+      user      = "root"
+      command   = ["chmod", "777", "/tmp"]
+
+      mountPoints = [
+        {
+          sourceVolume  = "tomcat-tmp"
+          containerPath = "/tmp"
+          readOnly      = false
+        }
+      ]
+    },
+
+    {
       name      = "backend"
       image     = "jmalloc/echo-server:latest"
       essential = true
 
       readonlyRootFilesystem = true
+
+      dependsOn = [
+        {
+          containerName = "init-volume-permissions"
+          condition     = "SUCCESS"
+        }
+      ]
 
       mountPoints = [
         {
