@@ -18,6 +18,7 @@ public class EstadisticaController {
     @Autowired
     private EstadisticaService service;
 
+    @Autowired
     private IdentityExtractor identityExtractor;
 
     @GetMapping("/me")
