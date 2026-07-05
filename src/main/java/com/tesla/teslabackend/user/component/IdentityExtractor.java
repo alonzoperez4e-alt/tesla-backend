@@ -1,5 +1,6 @@
 package com.tesla.teslabackend.user.component;
 
+import com.tesla.teslabackend.common.exception.UsuarioNoRegistradoException;
 import com.tesla.teslabackend.user.entity.Usuario;
 import com.tesla.teslabackend.user.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +16,13 @@ public class IdentityExtractor {
     public Integer getUsuarioId(Jwt jwt) {
         String cognitoSub = jwt.getSubject();
         return usuarioRepository.findByCognitoSub(cognitoSub)
-                .orElseThrow(() -> new RuntimeException("Usuario de Cognito no registrado en base de datos"))
+                .orElseThrow(() -> new UsuarioNoRegistradoException("Usuario de Cognito no registrado en base de datos"))
                 .getIdUsuario();
     }
 
     public Usuario getUsuario(Jwt jwt) {
         String cognitoSub = jwt.getSubject();
         return usuarioRepository.findByCognitoSub(cognitoSub)
-                .orElseThrow(() -> new RuntimeException("Usuario de Cognito no registrado en base de datos"));
+                .orElseThrow(() -> new UsuarioNoRegistradoException("Usuario de Cognito no registrado en base de datos"));
     }
 }
