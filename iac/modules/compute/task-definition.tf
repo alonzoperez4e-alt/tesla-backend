@@ -77,7 +77,7 @@ resource "aws_ecs_task_definition" "api" {
         },
         {
           name  = "MQ_HOST"
-          value = replace(replace(var.mq_endpoint, "amqps://", ""), ":5671", "")
+          value = var.mq_endpoint
         },
         {
           name  = "MQ_PORT"

@@ -1,8 +1,8 @@
 resource "aws_mq_broker" "rabbitmq" {
   broker_name        = "${var.project_name}-${var.environment}-mq"
-  engine_type        = "RabbitMQ"
-  engine_version     = "4.2"
-  host_instance_type = "mq.m7g.medium"
+  engine_type        = "ActiveMQ"
+  engine_version     = "5.19"
+  host_instance_type = "mq.t3.micro"
 
   auto_minor_version_upgrade = true
 

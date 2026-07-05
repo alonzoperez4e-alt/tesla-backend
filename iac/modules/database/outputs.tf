@@ -9,6 +9,6 @@ output "redis_endpoint" {
 }
 
 output "mq_endpoint" {
-  description = "Endpoint de conexión para el servicio de mensajería"
-  value = aws_mq_broker.rabbitmq.instances[0].endpoints[1]
+  description = "Hostname del broker de mensajería (sin esquema ni puerto; ActiveMQ expone varios endpoints con distinto protocolo/puerto pero el mismo host)"
+  value = regex("^[a-z0-9+]+://([^:/]+)", aws_mq_broker.rabbitmq.instances[0].endpoints[0])[0]
 }
