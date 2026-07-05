@@ -33,6 +33,14 @@ resource "aws_cloudfront_origin_request_policy" "api_policy" {
   }
 }
 
+resource "aws_cloudfront_function" "spa_router" {
+  name    = "${var.project_name}-${var.environment}-spa-router"
+  runtime = "cloudfront-js-1.0"
+  comment = "Reescribe rutas del SPA (sin extension) a /index.html sin depender de codigos de error del origen"
+  publish = true
+  code    = file("${path.module}/functions/spa-router.js")
+}
+
 resource "aws_s3_bucket" "cf_logs" {
   bucket        = "${var.project_name}-cf-logs-${var.environment}"
   force_destroy = var.environment != "prod" ? true : false
@@ -99,6 +107,11 @@ resource "aws_cloudfront_distribution" "cdn" {
     cached_methods         = ["GET", "HEAD"]
     compress               = true
     cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.spa_router.arn
+    }
   }
 
   ordered_cache_behavior {
@@ -130,20 +143,6 @@ resource "aws_cloudfront_distribution" "cdn" {
     cached_methods         = ["GET", "HEAD"]
     compress               = true
     cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6"
-  }
-
-  custom_error_response {
-    error_code            = 403
-    response_code         = 200
-    response_page_path    = "/index.html"
-    error_caching_min_ttl = 0
-  }
-
-  custom_error_response {
-    error_code            = 404
-    response_code         = 200
-    response_page_path    = "/index.html"
-    error_caching_min_ttl = 0
   }
 
   restrictions {
