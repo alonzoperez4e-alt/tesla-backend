@@ -56,6 +56,10 @@ resource "aws_ecs_task_definition" "api" {
           value = var.cognito_issuer_uri
         },
         {
+          name  = "COGNITO_USER_POOL_ID"
+          value = var.cognito_user_pool_id
+        },
+        {
           name  = "DB_URL"
           value = "jdbc:postgresql://${var.postgres_endpoint}/tesladb"
         },

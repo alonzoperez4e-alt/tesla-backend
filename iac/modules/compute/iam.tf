@@ -46,3 +46,25 @@ resource "aws_iam_role_policy" "ecs_task_s3" {
     ]
   })
 }
+
+resource "aws_iam_role_policy" "ecs_task_cognito" {
+  name = "${var.project_name}-${var.environment}-ecs-task-cognito-policy"
+  role   = aws_iam_role.ecs_task_role.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "cognito-idp:AdminCreateUser",
+          "cognito-idp:AdminAddUserToGroup",
+          "cognito-idp:AdminSetUserPassword",
+          "cognito-idp:AdminGetUser",
+          "cognito-idp:AdminDeleteUser",
+          "cognito-idp:ListUsers"
+        ]
+        Resource = var.cognito_user_pool_arn
+      }
+    ]
+  })
+}
