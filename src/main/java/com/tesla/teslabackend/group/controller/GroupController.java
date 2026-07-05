@@ -21,7 +21,7 @@ public class GroupController {
 
     private final GroupService groupService;
 
-    private IdentityExtractor identityExtractor;
+    private final IdentityExtractor identityExtractor;
 
     @PostMapping("/create")
     public ResponseEntity<?> createGroup(@RequestParam String name, @AuthenticationPrincipal Jwt jwt) {
