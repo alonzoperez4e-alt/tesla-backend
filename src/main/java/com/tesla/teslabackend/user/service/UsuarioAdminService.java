@@ -2,6 +2,7 @@ package com.tesla.teslabackend.user.service;
 
 import com.tesla.teslabackend.common.exception.CodigoUsuarioYaExisteException;
 import com.tesla.teslabackend.common.exception.CognitoNoDisponibleException;
+import com.tesla.teslabackend.common.exception.CognitoUsuarioYaExisteException;
 import com.tesla.teslabackend.common.exception.RolNoPermitidoException;
 import com.tesla.teslabackend.common.exception.UsuarioNoRegistradoException;
 import com.tesla.teslabackend.user.cognito.service.CognitoService;
@@ -82,16 +83,30 @@ public class UsuarioAdminService {
     private UsuarioDTO vincularConCognito(Usuario usuario, String email, String password) {
         String username = usuario.getCodigoUsuario();
         try {
-            String sub = cognitoService.crearUsuarioCognito(
-                    username, email, usuario.getNombre(), usuario.getApellido());
+            String sub;
+            boolean creadoEnEstaLlamada;
+            try {
+                sub = cognitoService.crearUsuarioCognito(
+                        username, email, usuario.getNombre(), usuario.getApellido());
+                creadoEnEstaLlamada = true;
+            } catch (CognitoUsuarioYaExisteException ex) {
+                // El usuario ya existe en Cognito (p. ej. un intento anterior lo creó pero
+                // no llegó a guardar el sub en BD): recuperar su sub y vincularlo en vez de
+                // fallar, para que la fila en BD deje de quedar "pendiente" para siempre.
+                logger.warn("El usuario [{}] ya existe en Cognito, se recupera su sub para vincularlo", username);
+                sub = cognitoService.obtenerSubUsuarioCognito(username);
+                creadoEnEstaLlamada = false;
+            }
 
             try {
                 cognitoService.establecerPasswordPermanente(username, password);
                 cognitoService.agregarUsuarioAGrupo(username, usuario.getRol().name());
             } catch (RuntimeException ex) {
-                // AdminCreateUser tuvo éxito pero un paso posterior falló: limpiar
-                // para que un reintento posterior no choque con UsernameExistsException.
-                cognitoService.eliminarUsuarioCognito(username);
+                // Solo limpiar en Cognito si el usuario fue creado en esta misma llamada:
+                // si ya existía de antes, borrarlo destruiría una cuenta ajena a este intento.
+                if (creadoEnEstaLlamada) {
+                    cognitoService.eliminarUsuarioCognito(username);
+                }
                 throw ex;
             }
 

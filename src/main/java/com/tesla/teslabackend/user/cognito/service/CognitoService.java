@@ -66,6 +66,30 @@ public class CognitoService {
         }
     }
 
+    /**
+     * Recupera el {@code sub} de un usuario que ya existe en Cognito (p. ej. cuando
+     * {@link #crearUsuarioCognito} lanzó {@link CognitoUsuarioYaExisteException}), para
+     * poder vincularlo en BD sin intentar crearlo de nuevo.
+     */
+    public String obtenerSubUsuarioCognito(String username) {
+        try {
+            AdminGetUserResponse response = cognitoClient.adminGetUser(AdminGetUserRequest.builder()
+                    .userPoolId(userPoolId)
+                    .username(username)
+                    .build());
+
+            return response.userAttributes().stream()
+                    .filter(attr -> "sub".equals(attr.name()))
+                    .map(AttributeType::value)
+                    .findFirst()
+                    .orElseThrow(() -> new CognitoNoDisponibleException(
+                            "Cognito no devolvió el atributo 'sub' del usuario existente", null));
+        } catch (SdkException ex) {
+            logger.warn("Fallo transitorio al recuperar el usuario existente en Cognito [{}]", username, ex);
+            throw new CognitoNoDisponibleException("No se pudo recuperar el usuario existente en Cognito", ex);
+        }
+    }
+
     /** Fija la contraseña como permanente (sin forzar cambio en el primer login). */
     public void establecerPasswordPermanente(String username, String password) {
         try {
