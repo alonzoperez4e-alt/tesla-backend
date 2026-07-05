@@ -73,5 +73,5 @@ module "edge" {
   project_name     = var.project_name
   environment      = var.environment
   alb_dns_name     = module.compute.alb_dns_name
-  alb_secret_token = var.cloudfront_secret_header
+  alb_secret_token = var.alb_secret_token
 }

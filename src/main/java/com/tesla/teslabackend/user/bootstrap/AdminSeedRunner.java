@@ -39,7 +39,7 @@ public class AdminSeedRunner implements CommandLineRunner {
     @Value("${ADMIN_SEED_APELLIDO:Principal}")
     private String apellido;
 
-    @Value("${ADMIN_SEED_PASSWORD:password1234$}")
+    @Value("${ADMIN_SEED_PASSWORD:TeslaAdmin2026$}")
     private String password;
 
     @Override
