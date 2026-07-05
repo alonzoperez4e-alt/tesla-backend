@@ -58,6 +58,16 @@ variable "cognito_issuer_uri" {
   type = string
 }
 
+variable "cognito_user_pool_id" {
+  description = "ID del User Pool de Cognito, usado por el backend para llamar a las Admin APIs (AdminCreateUser, etc.)"
+  type = string
+}
+
+variable "cognito_user_pool_arn" {
+  description = "ARN del User Pool de Cognito, para acotar los permisos IAM del task role"
+  type = string
+}
+
 variable "mq_username" {
   description = "Nombre de usuario para el servicio de mensajería"
   type = string
