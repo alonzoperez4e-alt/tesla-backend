@@ -27,19 +27,19 @@ public class AdminSeedRunner implements CommandLineRunner {
     @Autowired
     private UsuarioAdminService usuarioAdminService;
 
-    @Value("${ADMIN_SEED_CODIGO:#{null}}")
+    @Value("${ADMIN_SEED_CODIGO:00000001}")
     private String codigo;
 
-    @Value("${ADMIN_SEED_EMAIL:#{null}}")
+    @Value("${ADMIN_SEED_EMAIL:admin@tesla.edu}")
     private String email;
 
-    @Value("${ADMIN_SEED_NOMBRE:#{null}}")
+    @Value("${ADMIN_SEED_NOMBRE:Admin}")
     private String nombre;
 
-    @Value("${ADMIN_SEED_APELLIDO:#{null}}")
+    @Value("${ADMIN_SEED_APELLIDO:Principal}")
     private String apellido;
 
-    @Value("${ADMIN_SEED_PASSWORD:#{null}}")
+    @Value("${ADMIN_SEED_PASSWORD:password1234$}")
     private String password;
 
     @Override
