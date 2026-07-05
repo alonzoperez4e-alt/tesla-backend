@@ -14,6 +14,30 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("USUARIO_NO_REGISTRADO", ex.getMessage()));
     }
 
+    @ExceptionHandler(CodigoUsuarioYaExisteException.class)
+    public ResponseEntity<ErrorResponse> handleCodigoUsuarioYaExiste(CodigoUsuarioYaExisteException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("CODIGO_YA_EXISTE", ex.getMessage()));
+    }
+
+    @ExceptionHandler(CognitoUsuarioYaExisteException.class)
+    public ResponseEntity<ErrorResponse> handleCognitoUsuarioYaExiste(CognitoUsuarioYaExisteException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("COGNITO_USUARIO_YA_EXISTE", ex.getMessage()));
+    }
+
+    @ExceptionHandler(CognitoNoDisponibleException.class)
+    public ResponseEntity<ErrorResponse> handleCognitoNoDisponible(CognitoNoDisponibleException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorResponse("COGNITO_NO_DISPONIBLE", ex.getMessage()));
+    }
+
+    @ExceptionHandler(RolNoPermitidoException.class)
+    public ResponseEntity<ErrorResponse> handleRolNoPermitido(RolNoPermitidoException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("ROL_NO_PERMITIDO", ex.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
