@@ -38,7 +38,9 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "http://localhost:8081",
                 "https://academia-tesla.vercel.app",
-                "https://d13yx46la9i1ou.cloudfront.net"
+                "https://tesla-frontend-dev.vercel.app",
+                "https://d13yx46la9i1ou.cloudfront.net",
+                "https://d15f4uk8dq3tzb.cloudfront.net"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With", "X-Tesla-Origin-Token"));
