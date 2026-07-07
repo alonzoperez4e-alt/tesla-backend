@@ -92,8 +92,8 @@ resource "aws_ecs_task_definition" "api" {
           value = var.s3_images_bucket_name
         },
         {
-          name  = "CLOUDFRONT_STORAGE_URL"
-          value = var.cloudfront_domain_name
+          name  = "CDN_PUBLIC_BASE_URL"
+          value = var.cdn_public_base_url
         },
         {
           name  = "CORS_ALLOWED_ORIGINS"

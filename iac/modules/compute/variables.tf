@@ -88,8 +88,8 @@ variable "s3_images_bucket_name" {
   type = string
 }
 
-variable "cloudfront_domain_name" {
-  description = "Nombre de dominio de CloudFront para la distribución de contenido"
+variable "cdn_public_base_url" {
+  description = "URL base publica del CDN (CloudFront) usada por el backend para resolver URLs de imagenes"
   type = string
 }
 
