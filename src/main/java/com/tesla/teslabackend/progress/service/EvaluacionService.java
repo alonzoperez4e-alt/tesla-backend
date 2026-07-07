@@ -5,6 +5,7 @@ import com.tesla.teslabackend.lesson.entity.Leccion;
 import com.tesla.teslabackend.lesson.entity.Pregunta;
 import com.tesla.teslabackend.lesson.repository.LeccionRepository;
 import com.tesla.teslabackend.lesson.repository.PreguntaRepository;
+import com.tesla.teslabackend.lesson.storage.service.S3StorageService;
 import com.tesla.teslabackend.progress.dto.RespuestaAlumnoDTO;
 import com.tesla.teslabackend.progress.dto.SolicitudCalificacionDTO;
 import com.tesla.teslabackend.progress.dto.resultado.FeedbackPreguntaDTO;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 public class EvaluacionService {
 
     @Autowired private RankingRedisService rankingRedisService;
+    @Autowired private S3StorageService s3StorageService;
 
     @Autowired private PreguntaRepository preguntaRepository;
     @Autowired private LeccionRepository leccionRepository;
@@ -77,7 +79,7 @@ public class EvaluacionService {
 
             feedbackList.add(new FeedbackPreguntaDTO(
                     pregunta.getIdPregunta(), esCorrecta, idCorrecta,
-                    pregunta.getSolucionTexto(), pregunta.getSolucionImagenUrl()
+                    pregunta.getSolucionTexto(), s3StorageService.toPublicUrl(pregunta.getSolucionImagenKey())
             ));
         }
 

@@ -35,9 +35,9 @@ public class QuestionService {
         pregunta.setTextoPregunta(dto.textoPregunta());
         pregunta.setSolucionTexto(dto.solucionTexto());
 
-        // 2. Asignación directa de URLs desde S3
-        pregunta.setPreguntaImagenUrl(dto.preguntaImagenUrl());
-        pregunta.setSolucionImagenUrl(dto.solucionImagenUrl());
+        // 2. Asignación directa de las Object Keys de S3
+        pregunta.setPreguntaImagenKey(dto.preguntaImagenKey());
+        pregunta.setSolucionImagenKey(dto.solucionImagenKey());
 
         // 3. Guardar la pregunta en PostgreSQL
         Pregunta preguntaGuardada = preguntaRepository.save(pregunta);
@@ -64,14 +64,14 @@ public class QuestionService {
      */
     private void validarReglasDePregunta(CrearPreguntaDTO dto) {
         boolean tieneTextoPregunta = dto.textoPregunta() != null && !dto.textoPregunta().trim().isEmpty();
-        boolean tieneImagenPregunta = dto.preguntaImagenUrl() != null && !dto.preguntaImagenUrl().trim().isEmpty();
+        boolean tieneImagenPregunta = dto.preguntaImagenKey() != null && !dto.preguntaImagenKey().trim().isEmpty();
 
         if (!tieneTextoPregunta && !tieneImagenPregunta) {
             throw new IllegalArgumentException("Validación fallida: La pregunta debe contener texto o una imagen.");
         }
 
         boolean tieneTextoSolucion = dto.solucionTexto() != null && !dto.solucionTexto().trim().isEmpty();
-        boolean tieneImagenSolucion = dto.solucionImagenUrl() != null && !dto.solucionImagenUrl().trim().isEmpty();
+        boolean tieneImagenSolucion = dto.solucionImagenKey() != null && !dto.solucionImagenKey().trim().isEmpty();
 
         if (!tieneTextoSolucion && !tieneImagenSolucion) {
             throw new IllegalArgumentException("Validación fallida: La solución debe contener texto o una imagen.");
