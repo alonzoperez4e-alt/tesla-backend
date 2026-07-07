@@ -94,6 +94,10 @@ resource "aws_ecs_task_definition" "api" {
         {
           name  = "CLOUDFRONT_STORAGE_URL"
           value = var.cloudfront_domain_name
+        },
+        {
+          name  = "CORS_ALLOWED_ORIGINS"
+          value = var.cors_allowed_origins
         }
       ]
 

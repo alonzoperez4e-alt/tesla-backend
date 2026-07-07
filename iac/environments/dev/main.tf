@@ -66,6 +66,10 @@ module "compute" {
   alb_secret_token = var.alb_secret_token
   s3_images_bucket_name = module.edge.images_bucket_name
   cloudfront_domain_name = "https://${module.edge.cloudfront_domain_name}/storage"
+  cors_allowed_origins = join(",", concat(
+    var.extra_cors_origins,
+    ["https://${module.edge.cloudfront_domain_name}"]
+  ))
 }
 
 module "edge" {

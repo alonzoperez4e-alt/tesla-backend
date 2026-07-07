@@ -92,3 +92,8 @@ variable "cloudfront_domain_name" {
   description = "Nombre de dominio de CloudFront para la distribución de contenido"
   type = string
 }
+
+variable "cors_allowed_origins" {
+  description = "Lista de origins permitidos para CORS, separados por coma"
+  type        = string
+}
