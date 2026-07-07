@@ -13,6 +13,7 @@ import com.tesla.teslabackend.lesson.entity.Leccion;
 import com.tesla.teslabackend.lesson.entity.Pregunta;
 import com.tesla.teslabackend.lesson.repository.LeccionRepository;
 import com.tesla.teslabackend.lesson.repository.PreguntaRepository;
+import com.tesla.teslabackend.lesson.storage.service.S3StorageService;
 import com.tesla.teslabackend.course.repository.SemanaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class LessonService {
     @Autowired private LeccionRepository leccionRepository;
     @Autowired private PreguntaRepository preguntaRepository;
     @Autowired private SemanaRepository semanaRepository;
+    @Autowired private S3StorageService s3StorageService;
 
     @Transactional
     public Leccion crearLeccion(CrearLeccionDTO dto) {
@@ -59,7 +61,7 @@ public class LessonService {
         List<PreguntaDTO> preguntasDTO = preguntasEntity.stream().map(p -> new PreguntaDTO(
                 p.getIdPregunta(),
                 p.getTextoPregunta(),
-                p.getPreguntaImagenUrl(),
+                s3StorageService.toPublicUrl(p.getPreguntaImagenKey()),
                 p.getAlternativas().stream()
                         .map(a -> new AlternativaDTO(a.getIdAlternativa(), a.getTextoAlternativa()))
                         .collect(Collectors.toList())
@@ -82,9 +84,9 @@ public class LessonService {
                 l.getPreguntas().stream().map(p -> new PreguntaDetalleDTO(
                         p.getIdPregunta(),
                         p.getTextoPregunta(),
-                        p.getPreguntaImagenUrl(),
+                        s3StorageService.toPublicUrl(p.getPreguntaImagenKey()),
                         p.getSolucionTexto(),
-                        p.getSolucionImagenUrl(),
+                        s3StorageService.toPublicUrl(p.getSolucionImagenKey()),
                         p.getAlternativas().stream().map( a -> new AlternativaDetalleDTO(
                                 a.getIdAlternativa(),
                                 a.getTextoAlternativa(),

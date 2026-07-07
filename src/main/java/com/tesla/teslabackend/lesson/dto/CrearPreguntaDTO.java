@@ -6,7 +6,7 @@ public record CrearPreguntaDTO(
         Integer idLeccion,
         String textoPregunta,
         String solucionTexto,
-        String preguntaImagenUrl,
-        String solucionImagenUrl,
+        String preguntaImagenKey,
+        String solucionImagenKey,
         List<CrearAlternativaDTO> alternativas
 ) {}

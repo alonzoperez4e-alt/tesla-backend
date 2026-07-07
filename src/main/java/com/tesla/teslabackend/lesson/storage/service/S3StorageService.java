@@ -61,8 +61,10 @@ public class S3StorageService {
 
         String extension = extractExtension(originalFilename);
 
+        // El prefijo "images/" debe coincidir con el path pattern "/images/*"
+        // del comportamiento de CloudFront que enruta al bucket de imagenes.
         String fileKey = String.format(
-                "%s/%s%s",
+                "images/%s/%s%s",
                 folder,
                 UUID.randomUUID(),
                 extension
@@ -106,12 +108,20 @@ public class S3StorageService {
                 fileKey
         );
 
-        response.put(
-                "publicUrl",
-                publicBaseUrl + "/" + fileKey
-        );
-
         return response;
+    }
+
+    /**
+     * Resuelve la URL publica actual (via CDN) para una Object Key de S3.
+     * Se calcula en cada lectura para no acoplar datos persistidos a un dominio de CDN puntual.
+     */
+    public String toPublicUrl(String fileKey) {
+
+        if (fileKey == null || fileKey.isBlank()) {
+            return null;
+        }
+
+        return publicBaseUrl + "/" + fileKey;
     }
 
     /**

@@ -31,14 +31,14 @@ public class Pregunta {
     @Column(name = "texto_pregunta", nullable = false, columnDefinition = "TEXT")
     private String textoPregunta;
 
-    @Column(name = "pregunta_imagen_url", columnDefinition = "TEXT")
-    private String preguntaImagenUrl;
+    @Column(name = "pregunta_imagen_key", columnDefinition = "TEXT")
+    private String preguntaImagenKey;
 
     @Column(name = "solucion_texto", columnDefinition = "TEXT")
     private String solucionTexto;
 
-    @Column(name = "solucion_imagen_url", columnDefinition = "TEXT")
-    private String solucionImagenUrl;
+    @Column(name = "solucion_imagen_key", columnDefinition = "TEXT")
+    private String solucionImagenKey;
 
     @Builder.Default
     @OneToMany(mappedBy = "pregunta", cascade = CascadeType.ALL)
