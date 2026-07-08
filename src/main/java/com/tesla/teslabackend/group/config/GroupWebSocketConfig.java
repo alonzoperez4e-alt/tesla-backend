@@ -55,7 +55,7 @@ public class GroupWebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
         ReactorNettyTcpClient<byte[]> secureTcpClient = new ReactorNettyTcpClient<>(tcpClient, new StompReactorNettyCodec());
 
-        registry.enableStompBrokerRelay("/topic")
+        registry.enableStompBrokerRelay("/topic", "/queue")
                 .setClientLogin(clientLogin)
                 .setClientPasscode(clientPasscode)
                 .setSystemLogin(clientLogin)
