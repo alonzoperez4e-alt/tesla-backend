@@ -35,5 +35,10 @@ EXPOSE 8080
 # 8. Variables de entorno por defecto para optimizar la memoria de la JVM y fijar la zona horaria
 ENV JAVA_OPTS="-Duser.timezone=America/Lima -XX:MaxRAMPercentage=75.0"
 
-# 9. Comando de inicio usando las variables de entorno
+# 9. Healthcheck usando el endpoint de Actuator (wget viene con busybox en Alpine).
+# Util para docker/compose local; en Fargate la salud la evalua el ALB/task-def.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD wget -q -O /dev/null http://localhost:8080/actuator/health || exit 1
+
+# 10. Comando de inicio usando las variables de entorno
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]

@@ -1,0 +1,30 @@
+# El contexto de build solo necesita pom.xml y src/. Todo lo demas se excluye
+# para acelerar el build y evitar filtrar IaC/estado/credenciales a la imagen.
+
+# Artefactos de build (se generan dentro del contenedor)
+target/
+
+# Control de versiones y CI
+.git/
+.gitignore
+.gitattributes
+.github/
+
+# Infraestructura como codigo y su estado (NUNCA debe entrar a la imagen)
+iac/
+
+# Wrapper de Maven (el build usa la imagen maven, no el wrapper)
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Docs, compose y misc de entorno local
+*.md
+docker-compose.yml
+Procfile
+system.properties
