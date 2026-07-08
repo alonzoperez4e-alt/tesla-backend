@@ -109,3 +109,9 @@ variable "cors_allowed_origins" {
   description = "Lista de origins permitidos para CORS, separados por coma"
   type        = string
 }
+
+variable "alarm_email" {
+  description = "Email al que se suscriben las alarmas de CloudWatch (SNS). Vacio = sin suscripcion."
+  type = string
+  default = ""
+}

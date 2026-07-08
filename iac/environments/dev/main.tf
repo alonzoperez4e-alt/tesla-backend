@@ -72,6 +72,7 @@ module "compute" {
     var.extra_cors_origins,
     ["https://${module.edge.cloudfront_domain_name}"]
   ))
+  alarm_email = var.alarm_email
 }
 
 module "edge" {
