@@ -61,9 +61,9 @@ jobs:
           task-definition: task-definition.json
           container-name: backend
           image: ${{ steps.build-imagen.outputs.image }}
-          environment-variables: | 
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            MQ_PASSWORD=${{ secrets.MQ_PASSWORD }}
+          # DB_PASSWORD y MQ_PASSWORD ya no se inyectan aqui: la task definition
+          # los resuelve desde SSM Parameter Store (SecureString) via el bloque
+          # `secrets`, definido en Terraform (modules/compute).
 
       - name: desplegar nueva version en aws ecs
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1

@@ -48,6 +48,18 @@ variable "postgres_username" {
   type = string
 }
 
+variable "db_password" {
+  description = "Password de PostgreSQL. Se persiste en SSM Parameter Store (SecureString) y se inyecta a la task via 'secrets', no en texto plano."
+  type = string
+  sensitive = true
+}
+
+variable "mq_password" {
+  description = "Password de Amazon MQ. Se persiste en SSM Parameter Store (SecureString) y se inyecta a la task via 'secrets', no en texto plano."
+  type = string
+  sensitive = true
+}
+
 variable "redis_endpoint" {
   description = "Endpoint de la base de datos Redis"
   type = string
