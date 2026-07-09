@@ -101,6 +101,17 @@ resource "aws_ecs_task_definition" "api" {
         }
       ]
 
+      secrets = [
+        {
+          name      = "DB_PASSWORD"
+          valueFrom = aws_ssm_parameter.db_password.arn
+        },
+        {
+          name      = "MQ_PASSWORD"
+          valueFrom = aws_ssm_parameter.mq_password.arn
+        }
+      ]
+
       portMappings = [
         {
           containerPort = 8080

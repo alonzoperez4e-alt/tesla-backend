@@ -58,6 +58,8 @@ module "compute" {
   postgres_endpoint = module.database.postgres_endpoint
   postgres_username = var.db_username
   redis_endpoint = module.database.redis_endpoint
+  db_password = var.db_password
+  mq_password = var.mq_password
   cognito_issuer_uri = "https://cognito-idp.${var.aws_region}.amazonaws.com/${module.cognito.user_pool_id}"
   cognito_user_pool_id = module.cognito.user_pool_id
   cognito_user_pool_arn = module.cognito.user_pool_arn
