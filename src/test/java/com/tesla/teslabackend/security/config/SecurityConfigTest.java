@@ -7,11 +7,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Test unitario de la configuración de seguridad: valida el parseo de orígenes
- * CORS (separados por coma, con espacios y tokens vacíos) sin arrancar contexto
- * de Spring ni tocar la red (el JwtDecoder real no se instancia). Patrón AAA.
- */
 class SecurityConfigTest {
 
     private static CorsConfiguration corsFor(String allowedOrigins) {

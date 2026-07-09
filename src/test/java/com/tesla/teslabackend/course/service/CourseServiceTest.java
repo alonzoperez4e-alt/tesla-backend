@@ -22,11 +22,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Test unitario del dominio "course": mockea los repositorios y valida la lógica
- * de mapeo y las ramas de negocio sin arrancar contexto de Spring ni tocar
- * infraestructura (BD/Redis/MQ). Estructurado con el patrón AAA.
- */
 @ExtendWith(MockitoExtension.class)
 class CourseServiceTest {
 
@@ -36,7 +31,6 @@ class CourseServiceTest {
 
     @InjectMocks private CourseService courseService;
 
-    /** Helper para construir un curso habilitado sin repetir el builder en cada test. */
     private static Curso cursoHabilitado(int id, String nombre, String descripcion) {
         return Curso.builder()
                 .idCurso(id)

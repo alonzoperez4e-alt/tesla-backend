@@ -1,14 +1,9 @@
-# Configuración de Checkov para el escaneo de infraestructura como código.
 directory:
   - iac
 framework:
   - terraform
-# Excluir directorios locales de estado/proveedores de Terraform.
 skip-path:
   - iac/.*/\.terraform
-# Se arranca en soft-fail para inventariar hallazgos sin bloquear el pipeline.
-# Endurecer (poner soft-fail: false) una vez resueltos o justificados los findings.
 soft-fail: true
-# Skips justificados (descomentar tras validar cada uno):
 # skip-check:
 #   - CKV_AWS_2   # ALB en HTTP es intencional: va detras de CloudFront con header secreto

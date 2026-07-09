@@ -1,6 +1,4 @@
 #!/usr/bin/env sh
-# Hook pre-push liviano: corre los tests antes de permitir el push.
-# El gate fuerte (cobertura, SonarCloud, Checkov) vive en CI; aqui solo
 # buscamos feedback rapido para no pushear codigo que rompe la build.
 #
 # Habilitar (una vez por clon):  git config core.hooksPath .githooks

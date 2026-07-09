@@ -17,7 +17,6 @@ jobs:
       - name: checkout del codigo
         uses: actions/checkout@v6
         with:
-          # Sonar necesita el historial completo para el blame/attribution.
           fetch-depth: 0
 
       - name: configurar Java 21
@@ -53,6 +52,5 @@ jobs:
       - name: escaneo checkov sobre /iac
         uses: bridgecrewio/checkov-action@v12
         with:
-          # La configuracion (directorio, framework, soft-fail, skips) vive en .checkov.yaml
           config_file: .checkov.yaml
           output_format: cli
