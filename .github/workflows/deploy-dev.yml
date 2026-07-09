@@ -19,38 +19,16 @@ env:
 jobs:
 
   deploy:
-    name: Analyze & Deploy
+    name: Deploy
     runs-on: ubuntu-latest
     environment: dev
 
+    # La calidad (tests, cobertura y SonarCloud) se valida en ci.yml sobre el PR.
+    # Este workflow solo construye la imagen y la despliega. Proteger la rama
+    # 'develop' exigiendo el check de CI antes de mergear.
     steps:
       - name: checkout del codigo
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: configurar Java 21
-        uses: actions/setup-java@v5
-        with:
-          java-version: '21'
-          distribution: 'corretto'
-          cache: 'maven'
-
-      - name: cache sonarcloud
-        uses: actions/cache@v4.2.2
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: analisis sonarcloud y construccion
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=anghelo-pintado_tesla-backend \
-            -Dsonar.organization=anghelo-pintado \
-            -Dsonar.host.url=https://sonarcloud.io
 
       - name: autenticacion oidc con aws
         uses: aws-actions/configure-aws-credentials@v6
