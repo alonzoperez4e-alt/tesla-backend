@@ -72,3 +72,9 @@ variable "extra_cors_origins" {
     "https://tesla-frontend-dev.vercel.app"
   ]
 }
+
+variable "alarm_email" {
+  description = "Email para recibir las alarmas de CloudWatch (SNS). Vacio = sin suscripcion."
+  type        = string
+  default     = ""
+}
