@@ -8,7 +8,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SecurityConfigTest {
-
     private static CorsConfiguration corsFor(String allowedOrigins) {
         SecurityConfig config = new SecurityConfig();
         ReflectionTestUtils.setField(config, "allowedOrigins", allowedOrigins);
