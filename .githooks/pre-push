@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+# Hook pre-push liviano: corre los tests antes de permitir el push.
+# El gate fuerte (cobertura, SonarCloud, Checkov) vive en CI; aqui solo
+# buscamos feedback rapido para no pushear codigo que rompe la build.
+#
+# Habilitar (una vez por clon):  git config core.hooksPath .githooks
+# Saltar puntualmente:           git push --no-verify
+
+echo "[pre-push] Ejecutando tests (mvn test)..."
+if ! ./mvnw -q test; then
+  echo "[pre-push] Tests fallaron. Push abortado. (usa 'git push --no-verify' para saltar)"
+  exit 1
+fi
+
+echo "[pre-push] Tests OK."
+exit 0
