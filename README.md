@@ -1,13 +1,13 @@
 # Tesla Backend
 
-Plataforma backend basada en **Spring Boot 3** y **Java 21**, diseñada para desplegarse en **AWS (ECS Fargate)** utilizando una arquitectura de infraestructura modular con **Terraform**.
+Plataforma backend basada en **Spring Boot 4** y **Java 21**, diseñada para desplegarse en **AWS (ECS Fargate)** utilizando una arquitectura de infraestructura modular con **Terraform**.
 
 ## Arquitectura
 
 * **App:** Java 21, Spring Boot, Spring Security (OAuth2/JWT con Cognito), PostgreSQL, Redis, RabbitMQ.
 * **Infraestructura (AWS):** VPC, ALB, ECS (Fargate), ECR, RDS, ElastiCache, Amazon MQ, CloudFront y Cognito.
 * **IaC:** Terraform estructurado por módulos (`networking`, `security`, `database`, `compute`, `edge`, `cognito`) y entornos (`dev`, `qa`, `prod`). Incluye una capa fundacional (`bootstrap`).
-* **CI/CD:** GitHub Actions con autenticación OIDC hacia AWS, análisis en SonarCloud y despliegue continuo a ECS.
+* **CI/CD:** GitHub Actions con autenticación OIDC hacia AWS. La validación (tests + JaCoCo, SonarCloud y Checkov) corre en `ci.yml` sobre cada Pull Request; el despliegue continuo a ECS corre en `deploy-dev.yml` al hacer merge a `develop`.
 
 ## Prerrequisitos
 
@@ -24,7 +24,7 @@ Para el entorno de desarrollo local, utilizaremos contenedores para los servicio
 
 ### 1. Levantar Servicios Base (Docker)
 
-Levanta PostgreSQL, Redis, RabbitMQ y SonarQube localmente:
+Levanta PostgreSQL, Redis y RabbitMQ localmente (el análisis de calidad corre en SonarCloud vía CI, no localmente):
 
 ```bash
 docker compose up -d
@@ -95,11 +95,14 @@ terraform apply
 
 ```
 
-### FASE 2: Despliegue de Aplicación (GitHub Actions)
+### FASE 2: Validación y Despliegue de Aplicación (GitHub Actions)
 
-El proyecto incluye un pipeline en `.github/workflows/deploy-dev.yml` que reacciona a los pushes en la rama `develop` (o equivalentes para QA/Prod).
+El pipeline está separado en dos workflows:
 
-Para que GitHub Actions despliegue automáticamente el código en AWS ECS, debes configurar lo siguiente en **Settings > Secrets and variables > Actions** de tu repositorio en GitHub:
+* **`ci.yml`** (Continuous Integration): se dispara en cada **Pull Request** hacia `develop`/`main`. Corre `mvn verify` (tests + cobertura JaCoCo), análisis en SonarCloud y escaneo de IaC con Checkov. **No despliega.** Es el gate de calidad.
+* **`deploy-dev.yml`** (Continuous Deployment): se dispara al hacer **merge/push a `develop`**. Construye el `.jar`, publica la imagen en ECR y actualiza el servicio ECS. Asume código ya validado en el PR.
+
+Para que GitHub Actions funcione, configura lo siguiente en **Settings > Secrets and variables > Actions** de tu repositorio en GitHub:
 
 **Variables (`Repository variables`):**
 
@@ -112,13 +115,12 @@ Para que GitHub Actions despliegue automáticamente el código en AWS ECS, debes
 **Secretos (`Repository secrets`):**
 
 * `SONAR_TOKEN`: Tu token de autenticación para SonarCloud.
-* `DB_PASSWORD`: La contraseña de PostgreSQL a inyectar en las tareas ECS.
-* `MQ_PASSWORD`: La contraseña de RabbitMQ a inyectar en las tareas ECS.
+
+> **Nota sobre credenciales de BD y colas:** `DB_PASSWORD` y `MQ_PASSWORD` **ya no se inyectan desde GitHub**. Terraform los almacena en **AWS SSM Parameter Store** (`SecureString`) a partir de las variables definidas en `terraform.tfvars`, y la task definition de ECS los lee vía `secrets`/`valueFrom`. Así las contraseñas nunca viajan por el pipeline ni quedan en texto plano en la definición de tarea.
 
 **Flujo:**
 
-1. Haces push a `develop`.
-2. GitHub Actions analiza el código en SonarCloud.
-3. Se construye el `.jar` empaquetando la aplicación.
-4. Se compila y publica la imagen Docker en Amazon ECR usando el `Dockerfile` optimizado.
-5. Se inyecta la nueva imagen en la definición de tarea de ECS y se reinician los contenedores Fargate automáticamente sin tiempo de inactividad (Zero Downtime).
+1. Abres un Pull Request hacia `develop`.
+2. `ci.yml` corre tests + cobertura, SonarCloud y Checkov. El PR solo puede mergearse si el gate pasa.
+3. Al mergear a `develop`, `deploy-dev.yml` construye el `.jar` y publica la imagen Docker en Amazon ECR usando el `Dockerfile` optimizado.
+4. Se inyecta la nueva imagen en la definición de tarea de ECS (con los secretos resueltos desde SSM) y se reinician los contenedores Fargate automáticamente sin tiempo de inactividad (Zero Downtime).
