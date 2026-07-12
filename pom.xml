@@ -134,6 +134,13 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
+		<!-- Exporta las metricas de Micrometer (HTTP, JVM, HikariCP, etc.) a
+		     CloudWatch mediante push. El cliente cloudwatch de AWS SDK v2 lo
+		     gestiona la BOM ya importada arriba. -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-cloudwatch2</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

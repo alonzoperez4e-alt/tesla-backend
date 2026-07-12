@@ -89,3 +89,26 @@ resource "aws_iam_role_policy" "ecs_task_cognito" {
     ]
   })
 }
+
+# Permite a la app publicar metricas de aplicacion (Micrometer -> CloudWatch).
+# PutMetricData no admite ARNs de recurso, por eso Resource = "*" acotado con una
+# condicion sobre el namespace para respetar el minimo privilegio.
+resource "aws_iam_role_policy" "ecs_task_cloudwatch_metrics" {
+  name = "${var.project_name}-${var.environment}-ecs-task-cloudwatch-metrics-policy"
+  role   = aws_iam_role.ecs_task_role.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["cloudwatch:PutMetricData"]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "cloudwatch:namespace" = "Tesla/Backend-${var.environment}"
+          }
+        }
+      }
+    ]
+  })
+}
