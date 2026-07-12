@@ -1,0 +1,77 @@
+name: Terraform dev
+
+# Aplica la infraestructura (alarmas, dashboard, IAM, ALB, etc.) del entorno dev.
+# El deploy de la imagen ECS lo hace deploy-dev.yml; aqui solo se gestiona el IaC.
+# El servicio ECS tiene ignore_changes=[task_definition], por lo que un apply
+# no revierte la imagen desplegada por deploy-dev.yml.
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'iac/**'
+      - '.github/workflows/terraform-dev.yml'
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Accion a ejecutar'
+        type: choice
+        default: apply
+        options:
+          - plan
+          - apply
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  TF_WORKING_DIR: iac/environments/dev
+
+# Serializa las corridas para evitar applies concurrentes sobre el mismo estado.
+concurrency:
+  group: terraform-dev
+  cancel-in-progress: false
+
+jobs:
+  terraform:
+    name: Terraform dev
+    runs-on: ubuntu-latest
+    environment: dev
+
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+    steps:
+      - name: checkout del codigo
+        uses: actions/checkout@v6
+
+      - name: autenticacion oidc con aws
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: instalar terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: formato
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: init
+        run: terraform init -backend-config=backend.tfvars
+
+      - name: validate
+        run: terraform validate
+
+      - name: plan
+        run: terraform plan -var-file=terraform.tfvars -input=false -out=tfplan
+
+      - name: apply
+        if: github.event_name == 'push' || github.event.inputs.action == 'apply'
+        run: terraform apply -input=false tfplan
