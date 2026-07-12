@@ -17,7 +17,9 @@ resource "aws_lb_target_group" "api" {
   target_type = "ip"
 
   health_check {
-    path                = "/actuator/health"
+    # Readiness incluye BD y Redis: si una dependencia critica cae, el ALB saca
+    # la instancia de balanceo (la task sigue viva por el probe de liveness).
+    path                = "/actuator/health/readiness"
     interval            = 30
     timeout             = 5
     healthy_threshold   = 2
