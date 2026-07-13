@@ -106,53 +106,38 @@ resource "aws_cloudwatch_metric_alarm" "ecs_memory_high" {
 }
 
 # --- Alarmas de aplicacion (metricas Micrometer -> CloudWatch) ---
-# Usan expresiones SEARCH agregadas con SUM para resolver una sola serie
-# (requisito de las alarmas sobre metric math). Si aun no llegan metricas, la
-# busqueda queda vacia y treat_missing_data=notBreaching mantiene la alarma en OK.
+# CloudWatch NO soporta expresiones SEARCH en alarmas (solo en dashboards), por lo
+# que se referencian metricas directas con dimensiones exactas. Las metricas solo
+# se exportan en prod (perfil prod); en dev la alarma queda sin datos y
+# treat_missing_data=notBreaching la mantiene en OK.
 
 # Saturacion del pool de conexiones: hay peticiones esperando una conexion libre
 # a la BD (hikaricp.connections.pending > 0 sostenido). Sintoma temprano de
 # cuello de botella en BD antes de que se disparen timeouts/errores 5XX.
+# La dimension 'pool' es el nombre del pool HikariCP (spring.datasource.hikari.pool-name).
 resource "aws_cloudwatch_metric_alarm" "app_hikari_pending" {
   alarm_name          = "${var.project_name}-${var.environment}-app-hikari-pending"
   alarm_description   = "Conexiones en espera del pool HikariCP (saturacion de BD)"
-  comparison_operator = "GreaterThanThreshold"
+  namespace           = local.app_metrics_namespace
+  metric_name         = "hikaricp.connections.pending.value"
+  statistic           = "Maximum"
+  period              = 60
   evaluation_periods  = 3
   threshold           = 0
-  treat_missing_data  = "notBreaching"
-
-  metric_query {
-    id          = "pending"
-    label       = "HikariCP pending"
-    return_data = true
-    period      = 60
-    expression  = "SUM(SEARCH('Namespace=\"${local.app_metrics_namespace}\" MetricName=\"hikaricp.connections.pending.value\"', 'Average', 60))"
-  }
-
-  alarm_actions = [aws_sns_topic.alerts.arn]
-  ok_actions    = [aws_sns_topic.alerts.arn]
-}
-
-# Presion de memoria de la JVM: heap usado por encima de ~85% del heap maximo.
-# Con memoria de task=1024 MB y -XX:MaxRAMPercentage=75, el heap maximo ronda los
-# 768 MiB; el umbral (~653 MiB) avisa antes de que la MemoryUtilization del
-# contenedor (alarma ecs-memory-high) llegue al limite y ECS reinicie la task.
-resource "aws_cloudwatch_metric_alarm" "app_jvm_heap_high" {
-  alarm_name          = "${var.project_name}-${var.environment}-app-jvm-heap-high"
-  alarm_description   = "Heap de la JVM por encima de ~85% del maximo (riesgo de OOM)"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 5
-  threshold           = 685128089 # ~653 MiB (85% de 768 MiB)
   treat_missing_data  = "notBreaching"
 
-  metric_query {
-    id          = "heap_used"
-    label       = "Heap usado (bytes)"
-    return_data = true
-    period      = 60
-    expression  = "SUM(SEARCH('Namespace=\"${local.app_metrics_namespace}\" MetricName=\"jvm.memory.used.value\" area=\"heap\"', 'Average', 60))"
+  dimensions = {
+    pool = "TeslaHikariPool"
   }
 
   alarm_actions = [aws_sns_topic.alerts.arn]
   ok_actions    = [aws_sns_topic.alerts.arn]
 }
+
+# Nota: la alarma de heap JVM se descarto porque requeriria SEARCH (no soportado en
+# alarmas) o enumerar los pools de memoria por 'id', cuyos nombres dependen del GC
+# activo (G1/Serial) y la harian fragil. La presion de memoria del contenedor ya la
+# cubre la alarma 'ecs-memory-high' (MemoryUtilization), que es lo que gatilla el
+# reinicio de la task. El heap sigue visible en el widget del dashboard (que si
+# soporta SEARCH).
