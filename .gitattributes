@@ -1,2 +1,9 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+
+# Terraform siempre en LF. Los assets de codigo que terraform sube a AWS
+# byte-a-byte (p.ej. la CloudFront function spa-router.js, que se lee con file())
+# deben ser LF: AWS los almacena en LF y con CRLF terraform veria un diff perpetuo
+# en cada plan/apply.
+*.tf text eol=lf
+iac/**/*.js text eol=lf
