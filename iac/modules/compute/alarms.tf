@@ -125,6 +125,7 @@ resource "aws_cloudwatch_metric_alarm" "app_hikari_pending" {
     id          = "pending"
     label       = "HikariCP pending"
     return_data = true
+    period      = 60
     expression  = "SUM(SEARCH('Namespace=\"${local.app_metrics_namespace}\" MetricName=\"hikaricp.connections.pending.value\"', 'Average', 60))"
   }
 
@@ -148,6 +149,7 @@ resource "aws_cloudwatch_metric_alarm" "app_jvm_heap_high" {
     id          = "heap_used"
     label       = "Heap usado (bytes)"
     return_data = true
+    period      = 60
     expression  = "SUM(SEARCH('Namespace=\"${local.app_metrics_namespace}\" MetricName=\"jvm.memory.used.value\" area=\"heap\"', 'Average', 60))"
   }
 
