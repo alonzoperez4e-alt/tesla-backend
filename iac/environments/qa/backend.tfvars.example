@@ -1,5 +1,5 @@
 bucket         = "nombre-del-bucket"
-key            = "dev/terraform.tfstate"
+key            = "qa/terraform.tfstate"
 region         = "us-east-1"
 dynamodb_table = "tesla-bootstrap-terraform-locks"
 encrypt        = true
