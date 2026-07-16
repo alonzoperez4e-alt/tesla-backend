@@ -1,11 +1,5 @@
 terraform {
-  backend "s3" {
-    bucket = "tesla-bootstrap-terraform-state-813176030109"
-    key    = "prod/terraform.tfstate"
-    region = "us-east-1"
-    dynamodb_table = "tesla-bootstrap-terraform-locks"
-    encrypt = true
-  }
+  backend "s3" {}
 
   required_providers {
     aws = {

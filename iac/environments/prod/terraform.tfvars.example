@@ -1,3 +1,12 @@
 aws_region = "us-east-1"
 prefix = "tesla-backend-prod"
+project_name = "tesla-backend"
+environment = "prod"
 allowed_callback_urls = ["http://localhost:5173"]
+db_username = "tesla_backend_user"
+db_password = ""
+mq_username = "tesla_mq_user"
+mq_password = ""
+alb_secret_token = "tesla-prod-super-secret-token"
+cache_retention_days = 1
+cloudfront_secret_header = "cloudfront-secret-header-value"
