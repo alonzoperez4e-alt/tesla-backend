@@ -31,6 +31,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<aws.java.sdk.version>2.46.10</aws.java.sdk.version>
+		<shedlock.version>7.7.0</shedlock.version>
 		<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 	<dependencyManagement>
@@ -113,6 +114,19 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+		<!-- ShedLock: garantiza que la limpieza de chat (@Scheduled) se ejecute en
+		     UNA sola tarea ECS aunque el autoscaling tenga varias en paralelo.
+		     Usa Redis (ElastiCache) como lock store; no requiere tabla adicional. -->
+		<dependency>
+			<groupId>net.javacrumbs.shedlock</groupId>
+			<artifactId>shedlock-spring</artifactId>
+			<version>${shedlock.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.javacrumbs.shedlock</groupId>
+			<artifactId>shedlock-provider-redis-spring</artifactId>
+			<version>${shedlock.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.projectreactor.netty</groupId>

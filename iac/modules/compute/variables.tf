@@ -115,3 +115,21 @@ variable "alarm_email" {
   type = string
   default = ""
 }
+
+variable "min_capacity" {
+  description = "Numero minimo de tareas ECS. Con >=2 las tareas se reparten entre las 2 AZs (alta disponibilidad)."
+  type        = number
+  default     = 2
+}
+
+variable "max_capacity" {
+  description = "Numero maximo de tareas ECS al que puede escalar el autoscaling."
+  type        = number
+  default     = 4
+}
+
+variable "cpu_target_value" {
+  description = "Uso de CPU objetivo (%) para el target tracking. Se elige CPU y no memoria: la JVM retiene el heap, por lo que la memoria queda alta y plana y nunca dispara scale-in."
+  type        = number
+  default     = 65
+}

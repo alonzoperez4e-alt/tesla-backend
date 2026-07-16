@@ -2,7 +2,9 @@ resource "aws_ecs_service" "api" {
   name = "${var.project_name}-${var.environment}-service"
   cluster = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.api.arn
-  desired_count = 1
+  # Valor inicial al crear el servicio; a partir de ahi lo gobierna el
+  # autoscaling (ver ignore_changes y autoscaling.tf).
+  desired_count = var.min_capacity
   launch_type = "FARGATE"
   health_check_grace_period_seconds = 180
 
@@ -21,6 +23,8 @@ resource "aws_ecs_service" "api" {
   depends_on = [aws_lb_listener.api]
 
   lifecycle {
-    ignore_changes = [task_definition]
+    # task_definition: la imagen real la despliega el pipeline (deploy job).
+    # desired_count: lo gobierna el autoscaling; no revertir en cada apply.
+    ignore_changes = [task_definition, desired_count]
   }
 }

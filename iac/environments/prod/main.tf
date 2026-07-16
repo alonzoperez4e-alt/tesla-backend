@@ -73,6 +73,9 @@ module "compute" {
     ["https://${module.edge.cloudfront_domain_name}"]
   ))
   alarm_email = var.alarm_email
+  # Autoscaling: mismo perfil que qa (min 2 HA, techo 6).
+  min_capacity = 2
+  max_capacity = 6
 }
 
 module "edge" {
