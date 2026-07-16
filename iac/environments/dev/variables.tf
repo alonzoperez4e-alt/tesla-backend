@@ -65,12 +65,7 @@ variable "cloudfront_secret_header" {
 variable "extra_cors_origins" {
   description = "Origins adicionales de CORS (dev local, despliegues paralelos en Vercel, etc.)"
   type        = list(string)
-  default = [
-    "http://localhost:5173",
-    "http://localhost:8081",
-    "https://academia-tesla.vercel.app",
-    "https://tesla-frontend-dev.vercel.app"
-  ]
+  default = ["http://localhost:5173"]
 }
 
 variable "alarm_email" {
