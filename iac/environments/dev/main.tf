@@ -73,6 +73,9 @@ module "compute" {
     ["https://${module.edge.cloudfront_domain_name}"]
   ))
   alarm_email = var.alarm_email
+  # Autoscaling: min 2 para validar HA entre AZs; techo bajo en dev.
+  min_capacity = 2
+  max_capacity = 4
 }
 
 module "edge" {
