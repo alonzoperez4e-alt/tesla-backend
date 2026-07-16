@@ -84,10 +84,10 @@ resource "aws_cloudwatch_dashboard" "main" {
         width  = 24
         height = 6
         properties = {
-          title  = "Logs recientes (ERROR / WARN)"
+          title  = "Logs recientes (${var.environment == "dev" ? "INFO / WARN / ERROR" : "ERROR / WARN"})"
           region = var.aws_region
           view   = "table"
-          query  = "SOURCE '${aws_cloudwatch_log_group.ecs_logs.name}' | fields @timestamp, @message | filter @message like /(?i)(error|warn)/ | sort @timestamp desc | limit 50"
+          query  = var.environment == "dev" ? "SOURCE '${aws_cloudwatch_log_group.ecs_logs.name}' | fields @timestamp, @message | filter @message like /(?i)(error|warn|info)/ | sort @timestamp desc | limit 50" : "SOURCE '${aws_cloudwatch_log_group.ecs_logs.name}' | fields @timestamp, @message | filter @message like /(?i)(error|warn)/ | sort @timestamp desc | limit 50"
         }
       }
     ]
