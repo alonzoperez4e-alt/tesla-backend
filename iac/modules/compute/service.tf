@@ -2,9 +2,7 @@ resource "aws_ecs_service" "api" {
   name = "${var.project_name}-${var.environment}-service"
   cluster = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.api.arn
-  # Valor inicial al crear el servicio; a partir de ahi lo gobierna el
-  # autoscaling (ver ignore_changes y autoscaling.tf).
-  desired_count = var.min_capacity
+  desired_count = 1
   launch_type = "FARGATE"
   health_check_grace_period_seconds = 180
 
