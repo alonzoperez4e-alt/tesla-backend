@@ -1,10 +1,10 @@
 output "dev_cognito_user_pool_id" {
-  value = module.cognito.user_pool_id
+  value       = module.cognito.user_pool_id
   description = "ID del User Pool de Cognito para application-dev.properties"
 }
 
 output "dev_cognito_user_pool_client_id" {
-  value = module.cognito.user_pool_client_id
+  value       = module.cognito.user_pool_client_id
   description = "ID del cliente para el frontend"
 }
 
@@ -20,13 +20,9 @@ output "dev_postgres_endpoint" {
   value = module.database.postgres_endpoint
 }
 
-output "dev_redis_endpoint" {
-  value = module.database.redis_endpoint
-}
-
 output "dev_api_base_url" {
-  description = "URL base del API a consumir desde el Frontend"
-  value       = "http://${module.compute.alb_dns_name}"
+  description = "URL base del API (endpoint directo de API Gateway, sin pasar por CloudFront)"
+  value       = module.apigateway.api_endpoint
 }
 
 output "dev_ecr_repository_url" {

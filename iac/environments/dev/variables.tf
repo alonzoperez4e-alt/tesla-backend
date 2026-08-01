@@ -1,11 +1,11 @@
 variable "project_name" {
   description = "Nombre del proyecto"
-  type = string
+  type        = string
 }
 
 variable "environment" {
   description = "Entorno de despliegue (dev, qa, prod)"
-  type = string
+  type        = string
 }
 
 variable "aws_region" {
@@ -35,29 +35,8 @@ variable "db_password" {
   sensitive   = true
 }
 
-variable "mq_username" {
-  description = "Usuario administrador del servicio de mensajería"
-  type        = string
-}
-
-variable "mq_password" {
-  description = "Contraseña del servicio de mensajería (Inyectada por entorno)"
-  type        = string
-  sensitive   = true
-}
-
-variable "alb_secret_token" {
+variable "origin_secret_token" {
   description = "Token para validar que el trafico viene de CloudFront"
-  type        = string
-}
-
-variable "cache_retention_days" {
-  description = "Número de días que los datos se mantendrán en caché"
-  type        = number
-
-}
-variable "cloudfront_secret_header" {
-  description = "Valor secreto que CloudFront inyecta y el ALB valida."
   type        = string
   sensitive   = true
 }
@@ -65,7 +44,7 @@ variable "cloudfront_secret_header" {
 variable "extra_cors_origins" {
   description = "Origins adicionales de CORS (dev local, despliegues paralelos en Vercel, etc.)"
   type        = list(string)
-  default = ["http://localhost:5173"]
+  default     = ["http://localhost:5173"]
 }
 
 variable "alarm_email" {
