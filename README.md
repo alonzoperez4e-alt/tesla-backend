@@ -4,8 +4,10 @@ Plataforma backend basada en **Spring Boot 4** y **Java 21**, diseñada para des
 
 ## Arquitectura
 
-* **App:** Java 21, Spring Boot, Spring Security (OAuth2/JWT con Cognito), PostgreSQL, Redis, RabbitMQ.
-* **Infraestructura (AWS):** VPC, ALB, ECS (Fargate), ECR, RDS, ElastiCache, Amazon MQ, CloudFront y Cognito.
+* **App:** Java 21, Spring Boot, Spring Security (OAuth2/JWT con Cognito), PostgreSQL.
+* **Infraestructura (AWS):** VPC, API Gateway (HTTP) + VPC Link, ECS (Fargate) con Cloud Map, ECR, RDS, CloudFront y Cognito.
+
+> **Nota:** ElastiCache (Redis), Amazon MQ, el ALB y el NAT Gateway se eliminaron en la optimización FinOps. El ranking se agrega directamente desde PostgreSQL y el chat de grupos usa un broker STOMP en memoria (válido solo con una única tarea ECS).
 * **IaC:** Terraform estructurado por módulos (`networking`, `security`, `database`, `compute`, `edge`, `cognito`) y entornos (`dev`, `qa`, `prod`). Incluye una capa fundacional (`bootstrap`).
 * **CI/CD:** GitHub Actions con autenticación OIDC hacia AWS. La validación (tests + JaCoCo, SonarCloud y Checkov) corre en `ci.yml` sobre cada Pull Request; el despliegue continuo a ECS corre en `deploy-dev.yml` al hacer merge a `develop`.
 
@@ -24,7 +26,7 @@ Para el entorno de desarrollo local, utilizaremos contenedores para los servicio
 
 ### 1. Levantar Servicios Base (Docker)
 
-Levanta PostgreSQL, Redis y RabbitMQ localmente (el análisis de calidad corre en SonarCloud vía CI, no localmente):
+Levanta PostgreSQL localmente (el análisis de calidad corre en SonarCloud vía CI, no localmente):
 
 ```bash
 docker compose up -d
