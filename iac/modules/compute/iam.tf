@@ -10,7 +10,7 @@ data "aws_iam_policy_document" "ecs_assume_role" {
 }
 
 resource "aws_iam_role" "ecs_execution_role" {
-  name = "${var.project_name}-${var.environment}-ecs-execution-role"
+  name               = "${var.project_name}-${var.environment}-ecs-execution-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume_role.json
 }
 
@@ -24,7 +24,7 @@ resource "aws_iam_role_policy_attachment" "ecs_execution_role_policy" {
 # kms:Decrypt explicito; si se migra a una CMK, agregar kms:Decrypt sobre esa key.
 resource "aws_iam_role_policy" "ecs_execution_ssm" {
   name = "${var.project_name}-${var.environment}-ecs-execution-ssm-policy"
-  role   = aws_iam_role.ecs_execution_role.id
+  role = aws_iam_role.ecs_execution_role.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -33,7 +33,7 @@ resource "aws_iam_role_policy" "ecs_execution_ssm" {
         Action = ["ssm:GetParameters"]
         Resource = [
           aws_ssm_parameter.db_password.arn,
-          aws_ssm_parameter.mq_password.arn
+          aws_ssm_parameter.origin_token.arn
         ]
       }
     ]
@@ -41,13 +41,13 @@ resource "aws_iam_role_policy" "ecs_execution_ssm" {
 }
 
 resource "aws_iam_role" "ecs_task_role" {
-  name = "${var.project_name}-${var.environment}-ecs-task-role"
+  name               = "${var.project_name}-${var.environment}-ecs-task-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume_role.json
 }
 
 resource "aws_iam_role_policy" "ecs_task_s3" {
   name = "${var.project_name}-${var.environment}-ecs-task-s3-policy"
-  role   = aws_iam_role.ecs_task_role.id
+  role = aws_iam_role.ecs_task_role.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -70,7 +70,7 @@ resource "aws_iam_role_policy" "ecs_task_s3" {
 
 resource "aws_iam_role_policy" "ecs_task_cognito" {
   name = "${var.project_name}-${var.environment}-ecs-task-cognito-policy"
-  role   = aws_iam_role.ecs_task_role.id
+  role = aws_iam_role.ecs_task_role.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -95,7 +95,7 @@ resource "aws_iam_role_policy" "ecs_task_cognito" {
 # condicion sobre el namespace para respetar el minimo privilegio.
 resource "aws_iam_role_policy" "ecs_task_cloudwatch_metrics" {
   name = "${var.project_name}-${var.environment}-ecs-task-cloudwatch-metrics-policy"
-  role   = aws_iam_role.ecs_task_role.id
+  role = aws_iam_role.ecs_task_role.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
