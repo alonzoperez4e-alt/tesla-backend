@@ -17,49 +17,10 @@ resource "aws_sns_topic_subscription" "alerts_email" {
   endpoint  = var.alarm_email
 }
 
-# --- Alarmas del ALB ---
-
-resource "aws_cloudwatch_metric_alarm" "alb_5xx" {
-  alarm_name          = "${var.project_name}-${var.environment}-alb-5xx"
-  alarm_description   = "Errores 5XX devueltos por el target (backend) via ALB"
-  namespace           = "AWS/ApplicationELB"
-  metric_name         = "HTTPCode_Target_5XX_Count"
-  statistic           = "Sum"
-  period              = 60
-  evaluation_periods  = 5
-  threshold           = 5
-  comparison_operator = "GreaterThanThreshold"
-  treat_missing_data  = "notBreaching"
-
-  dimensions = {
-    LoadBalancer = aws_lb.api.arn_suffix
-    TargetGroup  = aws_lb_target_group.api.arn_suffix
-  }
-
-  alarm_actions = [aws_sns_topic.alerts.arn]
-  ok_actions    = [aws_sns_topic.alerts.arn]
-}
-
-resource "aws_cloudwatch_metric_alarm" "alb_unhealthy_hosts" {
-  alarm_name          = "${var.project_name}-${var.environment}-alb-unhealthy-hosts"
-  alarm_description   = "Hay targets no saludables detras del ALB"
-  namespace           = "AWS/ApplicationELB"
-  metric_name         = "UnHealthyHostCount"
-  statistic           = "Maximum"
-  period              = 60
-  evaluation_periods  = 3
-  threshold           = 1
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  treat_missing_data  = "notBreaching"
-
-  dimensions = {
-    LoadBalancer = aws_lb.api.arn_suffix
-    TargetGroup  = aws_lb_target_group.api.arn_suffix
-  }
-
-  alarm_actions = [aws_sns_topic.alerts.arn]
-  ok_actions    = [aws_sns_topic.alerts.arn]
-}
+# Nota: las alarmas de ALB (5XX de target y hosts no saludables) se eliminaron
+# junto con el balanceador. Su equivalente en la arquitectura con API Gateway son
+# las metricas de AWS/ApiGateway (5xx, Latency), pendientes de anadir cuando el
+# modulo apigateway quede instanciado.
 
 # --- Alarmas del servicio ECS ---
 
