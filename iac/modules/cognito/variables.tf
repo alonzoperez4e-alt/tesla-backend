@@ -3,6 +3,11 @@ variable "aws_region" {
   type        = string
 }
 
+variable "environment" {
+  description = "Entorno de despliegue (dev, qa, prod)"
+  type        = string
+}
+
 variable "prefix" {
   description = "Prefijo para los nombres de los recursos"
   type        = string
