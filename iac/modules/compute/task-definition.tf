@@ -68,26 +68,6 @@ resource "aws_ecs_task_definition" "api" {
           value = var.postgres_username
         },
         {
-          name  = "REDIS_HOST"
-          value = var.redis_endpoint
-        },
-        {
-          name  = "REDIS_PORT"
-          value = "6379"
-        },
-        {
-          name  = "MQ_HOST"
-          value = var.mq_endpoint
-        },
-        {
-          name  = "MQ_PORT"
-          value = "61614"
-        },
-        {
-          name  = "MQ_USERNAME"
-          value = var.mq_username
-        },
-        {
           name  = "S3_IMAGE_BUCKET_NAME"
           value = var.s3_images_bucket_name
         },
@@ -107,8 +87,8 @@ resource "aws_ecs_task_definition" "api" {
           valueFrom = aws_ssm_parameter.db_password.arn
         },
         {
-          name      = "MQ_PASSWORD"
-          valueFrom = aws_ssm_parameter.mq_password.arn
+          name      = "ORIGIN_TOKEN"
+          valueFrom = aws_ssm_parameter.origin_token.arn
         }
       ]
 

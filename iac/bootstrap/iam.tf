@@ -171,9 +171,9 @@ resource "aws_iam_policy" "github_actions_policy" {
       },
 
       {
-        Sid    = "STSCallerIdentity"
-        Effect = "Allow"
-        Action = ["sts:GetCallerIdentity"]
+        Sid      = "STSCallerIdentity"
+        Effect   = "Allow"
+        Action   = ["sts:GetCallerIdentity"]
         Resource = "*"
       }
     ]

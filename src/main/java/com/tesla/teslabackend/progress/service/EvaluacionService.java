@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 @Service
 public class EvaluacionService {
 
-    @Autowired private RankingRedisService rankingRedisService;
     @Autowired private S3StorageService s3StorageService;
 
     @Autowired private PreguntaRepository preguntaRepository;
@@ -145,16 +144,8 @@ public class EvaluacionService {
 
         progresoRepository.save(progreso);
 
-        if (expGanadaFinal > 0) {
-            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
-                    new org.springframework.transaction.support.TransactionSynchronization() {
-                        @Override
-                        public void afterCommit() {
-                            rankingRedisService.registrarExpSemanal(usuario.getIdUsuario(), expGanadaFinal, momentoIntento);
-                        }
-                    }
-            );
-        }
+        // La exp semanal ya no se replica a un ZSET de Redis tras el commit: el
+        // ranking se agrega directamente desde la tabla de intentos (RankingService).
 
         return new ResultadoEvaluacionDTO(respuestasCorrectas, expGanadaFinal, true, feedbackList);
     }

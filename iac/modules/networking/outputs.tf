@@ -8,11 +8,6 @@ output "public_subnets" {
   value       = aws_subnet.public[*].id
 }
 
-output "private_subnets" {
-  description = "IDs de las subredes privadas"
-  value       = aws_subnet.private[*].id
-}
-
 output "database_subnets" {
   description = "IDs de las subredes de bases de datos"
   value       = aws_subnet.database[*].id

@@ -12,6 +12,6 @@ resource "aws_default_security_group" "default" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-      Name = "${var.project_name}-${var.environment}-default-sg-restricted"
+    Name = "${var.project_name}-${var.environment}-default-sg-restricted"
   }
 }

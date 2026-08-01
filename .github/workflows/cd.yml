@@ -110,14 +110,12 @@ jobs:
       TF_VAR_prefix: tesla-backend-${{ needs.setup.outputs.env }}
       # Variables NO secretas especificas del entorno (GitHub Environment vars)
       TF_VAR_db_username: ${{ vars.DB_USERNAME }}
-      TF_VAR_mq_username: ${{ vars.MQ_USERNAME }}
-      TF_VAR_cache_retention_days: ${{ vars.CACHE_RETENTION_DAYS }}
       TF_VAR_allowed_callback_urls: ${{ vars.ALLOWED_CALLBACK_URLS }}
       # Variables secretas (Environment secrets, con fallback a repo secrets)
       TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
-      TF_VAR_mq_password: ${{ secrets.MQ_PASSWORD }}
-      TF_VAR_alb_secret_token: ${{ secrets.ALB_SECRET_TOKEN }}
-      TF_VAR_cloudfront_secret_header: ${{ secrets.CLOUDFRONT_SECRET_HEADER }}
+      # La variable de Terraform se renombro al retirar el ALB; el secreto en
+      # GitHub sigue llamandose ALB_SECRET_TOKEN para no tener que recrearlo.
+      TF_VAR_origin_secret_token: ${{ secrets.ALB_SECRET_TOKEN }}
 
     steps:
       - name: checkout del codigo

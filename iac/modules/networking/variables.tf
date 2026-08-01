@@ -1,29 +1,24 @@
 variable "project_name" {
   description = "Nombre del proyecto"
-  type = string
+  type        = string
 }
 
 variable "environment" {
   description = "Entorno de despliegue (dev, qa, prod)"
-  type = string
+  type        = string
 }
 
 variable "vpc_cidr" {
   description = "CIDR block para la VPC"
-  type = string
+  type        = string
 }
 
 variable "public_subnets_cidr" {
   description = "CIDR blocks para las subredes públicas"
-  type = list(string)
-}
-
-variable "private_subnets_cidr" {
-  description = "CIDR blocks para las subredes privadas"
-  type = list(string)
+  type        = list(string)
 }
 
 variable "database_subnets_cidr" {
-    description = "CIDR blocks para las subredes de base de datos"
-  type = list(string)
+  description = "CIDR blocks para las subredes de base de datos"
+  type        = list(string)
 }

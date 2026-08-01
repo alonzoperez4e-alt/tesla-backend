@@ -43,7 +43,9 @@ public class SecurityConfig {
                 .filter(origin -> !origin.isEmpty())
                 .toList());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With", "X-Tesla-Origin-Token"));
+        // X-Tesla-Origin-Token no se lista: lo inyecta CloudFront servidor a servidor
+        // hacia el origen, nunca lo envia el navegador.
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
