@@ -16,8 +16,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tesla.teslabackend.common.exception.ErrorResponse;
+
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -39,6 +40,11 @@ import jakarta.servlet.http.HttpServletResponse;
  * delante de la cadena de Spring Security para descartar el trafico ilegitimo
  * antes de procesar el JWT.</p>
  *
+ * <p>El {@code ObjectMapper} inyectado es el de Jackson 3 ({@code tools.jackson}),
+ * que es el que autoconfigura Spring Boot 4 como {@code JsonMapper}. Jackson 2
+ * sigue en el classpath por dependencias transitivas, pero no tiene ningun bean
+ * asociado.</p>
+ *
  * <p>Si {@code app.security.origin-token} viene vacio el filtro se desactiva, lo
  * que permite levantar la app en local. En el perfil {@code prod} la propiedad se
  * declara sin valor por defecto, de modo que la ausencia de la variable
@@ -51,7 +57,7 @@ public class OriginTokenFilter extends OncePerRequestFilter {
 
     public static final String ORIGIN_TOKEN_HEADER = "X-Tesla-Origin-Token";
 
-    private static final Logger logger = LoggerFactory.getLogger(OriginTokenFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(OriginTokenFilter.class);
 
     /**
      * Rutas exentas: las sondas de Actuator las invoca el HEALTHCHECK del
@@ -71,7 +77,7 @@ public class OriginTokenFilter extends OncePerRequestFilter {
         this.objectMapper = objectMapper;
 
         if (!this.enabled) {
-            logger.warn("app.security.origin-token esta vacio: la validacion de origen queda DESACTIVADA. "
+            log.warn("app.security.origin-token esta vacio: la validacion de origen queda DESACTIVADA. "
                     + "Solo deberia ocurrir en desarrollo local.");
         }
     }
@@ -94,7 +100,7 @@ public class OriginTokenFilter extends OncePerRequestFilter {
         }
 
         // No se registra el valor recibido para no volcar secretos en los logs.
-        logger.warn("Peticion rechazada por origen no autorizado: {} {}", request.getMethod(), request.getRequestURI());
+        log.warn("Peticion rechazada por origen no autorizado: {} {}", request.getMethod(), request.getRequestURI());
         responderProhibido(response);
     }
 
