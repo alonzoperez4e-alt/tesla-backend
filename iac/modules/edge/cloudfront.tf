@@ -17,10 +17,21 @@ resource "aws_cloudfront_origin_access_control" "images_oac" {
 resource "aws_cloudfront_origin_request_policy" "api_policy" {
   name = "${var.project_name}-${var.environment}-api-policy"
 
+  # Lista blanca deliberada. Dos ausencias importantes:
+  #  - Host: reenviarlo rompe API Gateway, que exige su propio hostname.
+  #  - X-Tesla-Origin-Token: no se reenvia el del visitante para que no pueda
+  #    suplantarlo; CloudFront siempre inyecta el suyo via custom_header.
   headers_config {
     header_behavior = "whitelist"
     headers {
-      items = ["Authorization", "Origin", "Access-Control-Request-Headers", "Access-Control-Request-Method"]
+      items = [
+        "Authorization",
+        "Content-Type",
+        "Accept",
+        "Origin",
+        "Access-Control-Request-Headers",
+        "Access-Control-Request-Method",
+      ]
     }
   }
 
@@ -78,19 +89,21 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 
   origin {
-    domain_name = var.alb_dns_name
-    origin_id   = "ALB-Backend"
+    domain_name = var.api_gateway_domain_name
+    origin_id   = "APIGW-Backend"
 
     custom_origin_config {
-      http_port              = 80
-      https_port             = 443
-      origin_protocol_policy = "http-only"
+      http_port  = 80
+      https_port = 443
+      # API Gateway solo acepta HTTPS; ademas el token secreto viaja en esta
+      # conexion, asi que nunca debe ir en claro por internet publico.
+      origin_protocol_policy = "https-only"
       origin_ssl_protocols   = ["TLSv1.2"]
     }
 
     custom_header {
       name  = "X-Tesla-Origin-Token"
-      value = var.alb_secret_token
+      value = var.origin_secret_token
     }
   }
 
@@ -116,24 +129,18 @@ resource "aws_cloudfront_distribution" "cdn" {
 
   ordered_cache_behavior {
     path_pattern           = "/api/*"
-    target_origin_id       = "ALB-Backend"
+    target_origin_id       = "APIGW-Backend"
     viewer_protocol_policy = "redirect-to-https"
     allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods         = ["GET", "HEAD"]
+    compress               = true
+    # CachingDisabled: las respuestas del API no se cachean en el borde.
     cache_policy_id          = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
     origin_request_policy_id = aws_cloudfront_origin_request_policy.api_policy.id
   }
 
-  ordered_cache_behavior {
-    path_pattern           = "/ws-chat/*"
-    target_origin_id       = "ALB-Backend"
-    viewer_protocol_policy = "redirect-to-https"
-    allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    cached_methods         = ["GET", "HEAD"]
-    compress               = false
-    cache_policy_id          = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
-    origin_request_policy_id = "b689b0a8-53d0-40ab-baf2-68738e2966ac"
-  }
+  # No hay behavior /ws-chat/*: API Gateway HTTP API no hace proxy de upgrades
+  # WebSocket, por lo que el chat de grupos queda aplazado.
 
   ordered_cache_behavior {
     path_pattern           = "/images/*"
