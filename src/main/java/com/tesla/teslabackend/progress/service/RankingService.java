@@ -7,73 +7,48 @@ import com.tesla.teslabackend.progress.repository.EstadisticasAlumnoRepository;
 import com.tesla.teslabackend.progress.repository.IntentoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * El ranking semanal se calcula directamente contra PostgreSQL. Antes se cacheaba
+ * en un ZSET de Redis (ElastiCache), eliminado en la optimizacion FinOps; la
+ * consulta agregada ya existia como camino de respaldo y ahora es el unico.
+ */
 @Service
 @Slf4j
 public class RankingService {
 
+    private static final int TAMANIO_TOP = 100;
+
     @Autowired private EstadisticasAlumnoRepository estadisticasRepository;
-    @Autowired private StringRedisTemplate redisTemplate;
-    @Autowired private RankingRedisService rankingRedisService;
     @Autowired private IntentoRepository intentoRepository;
 
     @Transactional(readOnly = true)
     public List<RankingItemDTO> obtenerRanking(Integer idUsuarioLogueado) {
         ZonedDateTime ahora = ZonedDateTime.now(ZoneId.of("America/Lima"));
-        String clave = "ranking:sem:" + TimeUtil.semanaISOdeLima(ahora);
+        ZonedDateTime inicioSemana = TimeUtil.obtenerInicioDeSemana(ahora);
+        ZonedDateTime finSemana = inicioSemana.plusWeeks(1);
 
-        Set<ZSetOperations.TypedTuple<String>> rankingRedis = null;
-        boolean redisDisponible = true;
-
-        try {
-            if (Boolean.FALSE.equals(redisTemplate.hasKey(clave))) {
-                ZonedDateTime inicioSemana = TimeUtil.obtenerInicioDeSemana(ahora);
-                ZonedDateTime finSemana = inicioSemana.plusWeeks(1);
-                rankingRedisService.reconstruirDesdeAurora(clave, inicioSemana, finSemana);
-            }
-            rankingRedis = redisTemplate.opsForZSet().reverseRangeWithScores(clave, 0, 99);
-        } catch (Exception e) {
-            log.warn("Redis no está disponible. Fallback a Aurora para el ranking. Error: {}", e.getMessage());
-            redisDisponible = false;
-        }
+        List<Object[]> agregado = intentoRepository.findExpAgregadaPorVentana(inicioSemana, finSemana);
+        if (agregado.isEmpty()) return new ArrayList<>();
 
         List<Integer> idsTop = new ArrayList<>();
         Map<Integer, Integer> scoresMap = new HashMap<>();
 
-        if (redisDisponible && rankingRedis != null && !rankingRedis.isEmpty()) {
-            for (ZSetOperations.TypedTuple<String> tuple : rankingRedis) {
-                Integer idUser = Integer.valueOf(Objects.requireNonNull(tuple.getValue()));
-                if (idUser == -1) continue;
-
-                Double score = tuple.getScore();
-                int finalScore = score != null ? score.intValue() : 0;
-
-                idsTop.add(idUser);
-                scoresMap.put(idUser, finalScore);
-            }
-        } else if (!redisDisponible) {
-            ZonedDateTime inicioSemana = TimeUtil.obtenerInicioDeSemana(ahora);
-            ZonedDateTime finSemana = inicioSemana.plusWeeks(1);
-            List<Object[]> dbRanking = intentoRepository.findExpAgregadaPorVentana(inicioSemana, finSemana);
-
-            for (int i = 0; i < Math.min(dbRanking.size(), 100); i++) {
-                Integer idUser = (Integer) dbRanking.get(i)[0];
-                Integer finalScore = Math.toIntExact((Long) dbRanking.get(i)[1]);
-                idsTop.add(idUser);
-                scoresMap.put(idUser, finalScore);
-            }
+        for (Object[] fila : agregado.subList(0, Math.min(agregado.size(), TAMANIO_TOP))) {
+            Integer idUser = (Integer) fila[0];
+            idsTop.add(idUser);
+            scoresMap.put(idUser, Math.toIntExact((Long) fila[1]));
         }
-
-        if (idsTop.isEmpty()) return new ArrayList<>();
 
         List<EstadisticasAlumno> statsList = estadisticasRepository.findAllById(idsTop);
         Map<Integer, EstadisticasAlumno> statsMap = statsList.stream()
