@@ -24,8 +24,9 @@ resource "aws_service_discovery_service" "backend" {
     }
   }
 
-  # ECS gestiona el estado de las instancias registradas; sin este bloque el
-  # registro de tareas Fargate es rechazado. No se fija failure_threshold: AWS
-  # dejo de soportarlo y siempre vale 1.
-  health_check_custom_config {}
+  # Sin health_check_custom_config a proposito. ECS registra igualmente las
+  # tareas con AWS_INIT_HEALTH_STATUS = HEALTHY (verificado en dev) y AWS deja
+  # el campo a null. Declarar el bloque vacio no lo envia a la API pero si crea
+  # una diferencia permanente en cada plan y, al ser ForceNew, forzaba
+  # reemplazar el servicio en cada apply.
 }
