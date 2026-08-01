@@ -16,7 +16,7 @@ provider "aws" {
     tags = {
       Environment = "prod"
       Project     = "tesla-backend"
-      ManagedBy    = "Terraform"
+      ManagedBy   = "Terraform"
     }
   }
 }
