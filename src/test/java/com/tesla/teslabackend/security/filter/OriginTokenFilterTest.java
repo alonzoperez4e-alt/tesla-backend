@@ -5,7 +5,8 @@ import java.io.StringWriter;
 
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +22,8 @@ class OriginTokenFilterTest {
 
     private static final String TOKEN = "token-secreto-de-cloudfront";
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    // Misma implementacion que autoconfigura Spring Boot 4.
+    private final ObjectMapper objectMapper = JsonMapper.builder().build();
     private final StringWriter cuerpoRespuesta = new StringWriter();
 
     private HttpServletRequest peticion(String uri, String cabecera) {

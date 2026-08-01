@@ -16,8 +16,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tesla.teslabackend.common.exception.ErrorResponse;
+
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -38,6 +39,11 @@ import jakarta.servlet.http.HttpServletResponse;
  * para que los rechazos se registren ya con su {@code requestId}, y muy por
  * delante de la cadena de Spring Security para descartar el trafico ilegitimo
  * antes de procesar el JWT.</p>
+ *
+ * <p>El {@code ObjectMapper} inyectado es el de Jackson 3 ({@code tools.jackson}),
+ * que es el que autoconfigura Spring Boot 4 como {@code JsonMapper}. Jackson 2
+ * sigue en el classpath por dependencias transitivas, pero no tiene ningun bean
+ * asociado.</p>
  *
  * <p>Si {@code app.security.origin-token} viene vacio el filtro se desactiva, lo
  * que permite levantar la app en local. En el perfil {@code prod} la propiedad se
