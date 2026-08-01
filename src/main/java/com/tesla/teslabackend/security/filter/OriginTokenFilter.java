@@ -57,7 +57,7 @@ public class OriginTokenFilter extends OncePerRequestFilter {
 
     public static final String ORIGIN_TOKEN_HEADER = "X-Tesla-Origin-Token";
 
-    private static final Logger logger = LoggerFactory.getLogger(OriginTokenFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(OriginTokenFilter.class);
 
     /**
      * Rutas exentas: las sondas de Actuator las invoca el HEALTHCHECK del
@@ -77,7 +77,7 @@ public class OriginTokenFilter extends OncePerRequestFilter {
         this.objectMapper = objectMapper;
 
         if (!this.enabled) {
-            logger.warn("app.security.origin-token esta vacio: la validacion de origen queda DESACTIVADA. "
+            log.warn("app.security.origin-token esta vacio: la validacion de origen queda DESACTIVADA. "
                     + "Solo deberia ocurrir en desarrollo local.");
         }
     }
@@ -100,7 +100,7 @@ public class OriginTokenFilter extends OncePerRequestFilter {
         }
 
         // No se registra el valor recibido para no volcar secretos en los logs.
-        logger.warn("Peticion rechazada por origen no autorizado: {} {}", request.getMethod(), request.getRequestURI());
+        log.warn("Peticion rechazada por origen no autorizado: {} {}", request.getMethod(), request.getRequestURI());
         responderProhibido(response);
     }
 
