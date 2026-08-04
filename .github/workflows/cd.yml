@@ -5,14 +5,16 @@ name: CD
 #
 # Orden garantizado en una sola corrida:
 #   setup (resuelve entorno + detecta cambios en iac/)
-#     -> terraform (aplica infra; solo si iac/** cambio o dispatch manual)
-#       -> deploy   (construye la imagen y la despliega en ECS)
+#     -> activar (enciende RDS y ECS si el despliegue cae fuera de horario)
+#       -> terraform (aplica infra; solo si iac/** cambio o dispatch manual)
+#         -> deploy   (construye la imagen y la despliega en ECS)
 #
 # deploy depende de terraform (needs), asi la infra se crea/actualiza ANTES
 # del despliegue. En la primera promocion a un entorno nuevo, terraform crea
 # el cluster/servicio ECS y luego deploy publica la imagen real, sin pasos
-# manuales. El servicio ECS tiene ignore_changes=[task_definition], por lo que
-# un apply posterior no revierte la imagen desplegada.
+# manuales; por eso 'activar' no falla cuando todavia no hay nada que encender.
+# El servicio ECS tiene ignore_changes=[task_definition], por lo que un apply
+# posterior no revierte la imagen desplegada.
 on:
   push:
     branches:
@@ -83,10 +85,104 @@ jobs:
             echo "iac_changed=false" >> "$GITHUB_OUTPUT"
           fi
 
+  # El backend solo esta encendido de 18:00 a 24:00 (hora de Lima). Un despliegue
+  # fuera de esa franja encontraria el servicio en 0 tareas y la instancia RDS
+  # parada, lo que rompe dos cosas:
+  #   - Un 'terraform apply' que modifique la instancia RDS falla si esta detenida.
+  #   - Con 0 tareas el waiter 'servicesStable' termina al instante y la
+  #     verificacion de rollback del final del job 'deploy' daria verde sin haber
+  #     comprobado que la imagen nueva arranca, anulando el circuit breaker.
+  # Por eso se enciende todo antes de desplegar. El cierre programado de esa misma
+  # noche devuelve el servicio a 0; el coste de las horas extra es despreciable.
+  #
+  # Los dos pasos toleran que los recursos aun no existan: en la primera promocion a
+  # un entorno nuevo es 'terraform' quien los crea, y hacer fallar este job dejaria
+  # el entorno sin poder crearse nunca.
+  #
+  # No corre en un dispatch de solo 'plan': 'terraform plan' lee sin problema una
+  # instancia detenida, encenderla no aportaria nada.
+  activar:
+    name: Activar entorno ${{ needs.setup.outputs.env }}
+    needs: setup
+    if: github.event_name == 'push' || github.event.inputs.action == 'apply'
+    runs-on: ubuntu-latest
+    environment: ${{ needs.setup.outputs.env }}
+    permissions:
+      id-token: write
+      contents: read
+
+    env:
+      AWS_REGION: us-east-1
+      ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+      ECS_SERVICE: ${{ vars.ECS_SERVICE }}
+      # Mismo identificador que construye iac/modules/database/bd.tf a partir de
+      # project_name (fijado a 'tesla-backend') y el entorno.
+      DB_INSTANCE_ID: tesla-backend-${{ needs.setup.outputs.env }}-db
+
+    steps:
+      - name: autenticacion oidc con aws
+        uses: aws-actions/configure-aws-credentials@517a711dbcd0e402f90c77e7e2f81e849156e31d # v6
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: arrancar la instancia rds si esta parada
+        run: |
+          # El '|| echo' captura DBInstanceNotFound sin disparar 'set -e': dentro de
+          # una sustitucion de comando el fallo se absorbe en el valor.
+          ESTADO=$(aws rds describe-db-instances \
+            --db-instance-identifier "$DB_INSTANCE_ID" \
+            --query "DBInstances[0].DBInstanceStatus" --output text 2>/dev/null \
+            || echo NO_EXISTE)
+
+          if [ "$ESTADO" = "NO_EXISTE" ]; then
+            echo "La instancia $DB_INSTANCE_ID aun no existe; la creara terraform."
+            exit 0
+          fi
+
+          echo "Estado actual de $DB_INSTANCE_ID: $ESTADO"
+
+          if [ "$ESTADO" = "stopped" ]; then
+            aws rds start-db-instance --db-instance-identifier "$DB_INSTANCE_ID" >/dev/null
+            echo "Arranque solicitado."
+          fi
+
+          # Espera tambien si la instancia estaba a medio arrancar (starting,
+          # modifying, ...): el deploy necesita que este 'available'.
+          aws rds wait db-instance-available --db-instance-identifier "$DB_INSTANCE_ID"
+          echo "La base de datos esta disponible."
+
+      - name: escalar el servicio ecs a una tarea
+        run: |
+          # Cubre los dos casos de un entorno a medio crear: si falta el cluster el
+          # comando falla, y si solo falta el servicio devuelve 'None'.
+          ESTADO=$(aws ecs describe-services \
+            --cluster "$ECS_CLUSTER" --services "$ECS_SERVICE" \
+            --query "services[0].status" --output text 2>/dev/null \
+            || echo NO_EXISTE)
+
+          if [ "$ESTADO" != "ACTIVE" ]; then
+            echo "El servicio $ECS_SERVICE aun no esta activo ($ESTADO); lo creara terraform."
+            exit 0
+          fi
+
+          aws ecs update-service \
+            --cluster "$ECS_CLUSTER" --service "$ECS_SERVICE" \
+            --desired-count 1 >/dev/null
+          echo "Servicio $ECS_SERVICE escalado a 1 tarea."
+
   terraform:
     name: Terraform ${{ needs.setup.outputs.env }}
-    needs: setup
-    if: needs.setup.outputs.iac_changed == 'true' || github.event_name == 'workflow_dispatch'
+    needs: [setup, activar]
+    # 'always()' porque en un dispatch de solo 'plan' el job 'activar' se salta, y un
+    # 'needs' saltado arrastraria a este sin el. Lo que no se tolera es que 'activar'
+    # haya fallado de verdad.
+    if: >-
+      always()
+      && needs.setup.result == 'success'
+      && needs.activar.result != 'failure'
+      && needs.activar.result != 'cancelled'
+      && (needs.setup.outputs.iac_changed == 'true' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     environment: ${{ needs.setup.outputs.env }}
     permissions:
@@ -157,12 +253,15 @@ jobs:
 
   deploy:
     name: Deploy ${{ needs.setup.outputs.env }}
-    needs: [setup, terraform]
+    needs: [setup, activar, terraform]
     # Corre tras terraform (o si este se salto por no haber cambios de infra),
     # pero no si terraform fallo/cancelo, ni en un dispatch de solo 'plan'.
+    # 'activar' si es obligatorio: sin el, el servicio podria estar en 0 tareas y
+    # el despliegue no validaria nada.
     if: >-
       always()
       && needs.setup.result == 'success'
+      && needs.activar.result == 'success'
       && needs.terraform.result != 'failure'
       && needs.terraform.result != 'cancelled'
       && (github.event_name == 'push' || github.event.inputs.action == 'apply')
