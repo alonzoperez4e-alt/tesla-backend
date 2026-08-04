@@ -8,7 +8,7 @@ Plataforma backend basada en **Spring Boot 4** y **Java 21**, diseñada para des
 * **Infraestructura (AWS):** VPC, API Gateway (HTTP) + VPC Link, ECS (Fargate) con Cloud Map, ECR, RDS, CloudFront y Cognito.
 
 > **Nota:** ElastiCache (Redis), Amazon MQ, el ALB y el NAT Gateway se eliminaron en la optimización FinOps. El ranking se agrega directamente desde PostgreSQL y el chat de grupos usa un broker STOMP en memoria (válido solo con una única tarea ECS).
-* **IaC:** Terraform estructurado por módulos (`networking`, `security`, `database`, `compute`, `edge`, `cognito`) y entornos (`dev`, `qa`, `prod`). Incluye una capa fundacional (`bootstrap`).
+* **IaC:** Terraform estructurado por módulos (`networking`, `security`, `database`, `compute`, `edge`, `cognito`) y entornos (`dev`, `prod`). Incluye una capa fundacional (`bootstrap`).
 * **CI/CD:** GitHub Actions con autenticación OIDC hacia AWS. La validación (tests + JaCoCo, SonarCloud y Checkov) corre en `ci.yml` sobre cada Pull Request; el despliegue continuo a ECS corre en `deploy-dev.yml` al hacer merge a `develop`.
 
 ## Prerrequisitos
@@ -147,7 +147,7 @@ lugar del error genérico de API Gateway.
 programado de esa misma noche lo devolverá a 0, no hace falta apagarlo:
 
 ```bash
-ENTORNO=dev  # dev | qa | prod
+ENTORNO=dev  # dev | prod
 
 aws rds start-db-instance --db-instance-identifier "tesla-backend-$ENTORNO-db"
 aws rds wait db-instance-available --db-instance-identifier "tesla-backend-$ENTORNO-db"

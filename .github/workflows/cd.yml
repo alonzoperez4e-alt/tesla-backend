@@ -1,7 +1,7 @@
 name: CD
 
 # Pipeline de entrega continua por entorno segun la rama:
-#   develop -> dev, qa -> qa, main -> prod.
+#   develop -> dev, main -> prod.
 #
 # Orden garantizado en una sola corrida:
 #   setup (resuelve entorno + detecta cambios en iac/)
@@ -19,7 +19,6 @@ on:
   push:
     branches:
       - develop
-      - qa
       - main
   workflow_dispatch:
     inputs:
@@ -36,7 +35,7 @@ on:
 permissions:
   contents: read
 
-# Serializa por entorno; qa y prod no se bloquean entre si.
+# Serializa por entorno; dev y prod no se bloquean entre si.
 concurrency:
   group: cd-${{ github.ref_name }}
   cancel-in-progress: false
@@ -56,7 +55,6 @@ jobs:
         run: |
           case "$REF_NAME" in
             develop) echo "env=dev"  >> "$GITHUB_OUTPUT" ;;
-            qa)      echo "env=qa"   >> "$GITHUB_OUTPUT" ;;
             main)    echo "env=prod" >> "$GITHUB_OUTPUT" ;;
             *) echo "::error::Rama no mapeada a ningun entorno: $REF_NAME"; exit 1 ;;
           esac

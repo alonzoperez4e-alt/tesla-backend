@@ -138,14 +138,14 @@ Terraform, structured as:
 
 - `iac/bootstrap/` — foundational layer (S3 state bucket, DynamoDB lock table, GitHub OIDC roles). Deployed once, manually, before any environment.
 - `iac/modules/` — reusable modules: `networking`, `security`, `database`, `compute`, `edge` (+ `edge/functions`), `cognito`, `apigateway`.
-- `iac/environments/{dev,prod}` — per-environment root modules composing the above modules. (QA reuses the same environment pattern via CI branch mapping, see below.)
+- `iac/environments/{dev,prod}` — per-environment root modules composing the above modules. These two are the only environments; `develop` and `main` are the only branches that deploy.
 
 Checkov scans `iac/` in CI (`.checkov.yaml`, soft-fail mode — findings don't block the PR).
 
 ## CI/CD
 
-- **`ci.yml`** (PRs to `develop`/`qa`/`main`): runs `mvn verify` + SonarCloud analysis, and a Checkov IaC scan. Quality gate only — no deploys.
-- **`cd.yml`** (push to `develop`/`qa`/`main`, or manual dispatch): maps branch → environment (`develop`→dev, `qa`→qa, `main`→prod), runs `activar` (starts RDS and scales ECS to 1 — see "Service window" above), conditionally runs Terraform only if `iac/**` changed (or on manual dispatch), then builds/pushes the Docker image to ECR and updates the ECS service. `deploy` depends on `terraform` so infra changes land before the new image ships. The ECS service has `ignore_changes=[task_definition]`, so a later `terraform apply` won't roll back the deployed image.
+- **`ci.yml`** (PRs to `develop`/`main`): runs `mvn verify` + SonarCloud analysis, and a Checkov IaC scan. Quality gate only — no deploys.
+- **`cd.yml`** (push to `develop`/`main`, or manual dispatch): maps branch → environment (`develop`→dev, `main`→prod), runs `activar` (starts RDS and scales ECS to 1 — see "Service window" above), conditionally runs Terraform only if `iac/**` changed (or on manual dispatch), then builds/pushes the Docker image to ECR and updates the ECS service. `deploy` depends on `terraform` so infra changes land before the new image ships. The ECS service has `ignore_changes=[task_definition]`, so a later `terraform apply` won't roll back the deployed image.
 - **Deploy failures roll back automatically.** The service enables `deployment_circuit_breaker` with `rollback = true`: an image that can't start (3 failed task launches, or containers the `HEALTHCHECK` marks unhealthy) aborts the deployment and restores the previous revision. Because the CD action only waits on the `servicesStable` waiter — and a rolled-back service *is* stable — the workflow has an explicit "verificar que no hubo rollback" step comparing the `PRIMARY` deployment's task definition against the one just registered. Without it a failed deploy would report success. Keep that step if you change the deploy action.
 - DB/MQ passwords are never passed through GitHub Actions as plain secrets into the app — Terraform writes them to SSM Parameter Store (`SecureString`) from `terraform.tfvars`, and the ECS task definition reads them via `secrets`/`valueFrom`.
 
