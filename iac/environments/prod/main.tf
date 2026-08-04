@@ -83,4 +83,25 @@ module "edge" {
 
   api_gateway_domain_name = module.apigateway.api_domain_name
   origin_secret_token     = var.origin_secret_token
+
+  hora_apertura      = var.ventana_hora_apertura
+  hora_cierre        = var.ventana_hora_cierre
+  ventana_habilitada = var.ventana_habilitada
+}
+
+module "scheduler" {
+  source       = "../../modules/scheduler"
+  project_name = "tesla-backend"
+  environment  = var.environment
+
+  ecs_cluster_name = module.compute.ecs_cluster_name
+  ecs_service_name = module.compute.ecs_service_name
+  ecs_service_arn  = module.compute.ecs_service_arn
+
+  db_instance_identifier = module.database.db_instance_identifier
+  db_instance_arn        = module.database.db_instance_arn
+
+  hora_apertura = var.ventana_hora_apertura
+  hora_cierre   = var.ventana_hora_cierre
+  habilitado    = var.ventana_habilitada
 }

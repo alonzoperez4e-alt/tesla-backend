@@ -4,7 +4,7 @@ variable "project_name" {
 }
 
 variable "environment" {
-  description = "Entorno de despliegue (dev, qa, prod)"
+  description = "Entorno de despliegue (dev, prod)"
   type        = string
 }
 
@@ -51,4 +51,27 @@ variable "alarm_email" {
   description = "Email para recibir las alarmas de CloudWatch (SNS). Vacio = sin suscripcion."
   type        = string
   default     = ""
+}
+
+# --- Ventana de disponibilidad ---
+# El backend solo se mantiene encendido entre estas dos horas (hora de Lima); fuera
+# de la franja el modulo scheduler apaga la task ECS y la instancia RDS, y
+# CloudFront responde 503 en /api/*.
+
+variable "ventana_hora_apertura" {
+  description = "Hora de Lima (0-23) en la que se enciende el servicio"
+  type        = number
+  default     = 18
+}
+
+variable "ventana_hora_cierre" {
+  description = "Hora de Lima (0-23) en la que se apaga el servicio. 0 equivale a las 24:00."
+  type        = number
+  default     = 0
+}
+
+variable "ventana_habilitada" {
+  description = "Poner a false para volver a disponibilidad 24h sin destruir las programaciones."
+  type        = bool
+  default     = true
 }

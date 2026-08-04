@@ -72,6 +72,35 @@ If horizontal scaling is ever restored, both need addressing before scaling out 
 
 The group chat is also not publicly reachable: API Gateway HTTP API cannot proxy WebSocket upgrades, so the `/ws-chat/*` CloudFront behavior was removed. The endpoint still works locally and directly against the task.
 
+### Service window: the backend is only up 18:00–24:00 (America/Lima)
+
+The two remaining hourly-billed resources — the Fargate task and the `db.t4g.micro` RDS instance — are shut down outside the evening window. `iac/modules/scheduler/` drives it with four EventBridge Scheduler schedules (universal targets, so no Lambda), all expressed in Lima time via `schedule_expression_timezone`:
+
+| Lima time | Action |
+|---|---|
+| 17:40 | `rds:startDBInstance` — 20 min of headroom; the app won't boot without the DB |
+| 18:00 | `ecs:updateService` → `DesiredCount = 1` |
+| 00:00 | `ecs:updateService` → `DesiredCount = 0` |
+| 00:10 | `rds:stopDBInstance` — after ECS, so no live connections are cut |
+
+Things that depend on this window and will break silently if it moves:
+
+- **RDS backup/maintenance windows must stay inside it.** A stopped instance runs no automated backups. `iac/modules/database/bd.tf` therefore uses `23:10-23:40` UTC (18:10–18:40 Lima) and `Tue:03:00-Tue:04:00` UTC (Mon 22:00–23:00 Lima), not the small hours.
+- **`RankingCronTask` must fire inside it.** It moved from Monday 00:00 to Monday 18:05 (`app.ranking.snapshot.cron`). The window it aggregates is derived from `previousOrSame(MONDAY).atStartOfDay()`, so any time on a Monday yields the identical interval — only the day of week matters.
+- **The CD pipeline turns everything on before deploying** (`activar` job). With 0 tasks the `servicesStable` waiter returns immediately and the circuit-breaker rollback check would pass without validating anything; and `terraform apply` fails against a stopped RDS instance.
+- **CloudFront answers 503 on `/api/*` outside the window** via the `service-hours` function (`cloudfront-js-2.0`, needed for `Date`), rendered from `functions/service-hours.js.tftpl` by `templatefile()` so the hours can't drift from the scheduler. Otherwise callers would get API Gateway's generic error, indistinguishable from an outage.
+
+Terraform never fights the scheduler: `aws_ecs_service.api` has `ignore_changes = [task_definition, desired_count]`. Set `ventana_habilitada = false` in an environment to park the schedules in `DISABLED` and return to 24/7 without destroying anything.
+
+To bring the service up manually outside the window:
+
+```bash
+aws rds start-db-instance --db-instance-identifier tesla-backend-<env>-db
+aws rds wait db-instance-available --db-instance-identifier tesla-backend-<env>-db
+aws ecs update-service --cluster tesla-backend-<env>-cluster \
+  --service tesla-backend-<env>-service --desired-count 1
+```
+
 ### The origin-token filter is the real perimeter
 
 `OriginTokenFilter` (`security/filter/`) rejects with 403 any request lacking the `X-Tesla-Origin-Token` header that CloudFront injects. This is **not** defense in depth — it is the only enforcement point. The HTTP API is deployed with `disable_execute_api_endpoint = false` (it cannot be disabled without a custom domain), so its `execute-api` URL is public and bypasses CloudFront entirely.
@@ -109,14 +138,14 @@ Terraform, structured as:
 
 - `iac/bootstrap/` — foundational layer (S3 state bucket, DynamoDB lock table, GitHub OIDC roles). Deployed once, manually, before any environment.
 - `iac/modules/` — reusable modules: `networking`, `security`, `database`, `compute`, `edge` (+ `edge/functions`), `cognito`, `apigateway`.
-- `iac/environments/{dev,prod}` — per-environment root modules composing the above modules. (QA reuses the same environment pattern via CI branch mapping, see below.)
+- `iac/environments/{dev,prod}` — per-environment root modules composing the above modules. These two are the only environments; `develop` and `main` are the only branches that deploy.
 
 Checkov scans `iac/` in CI (`.checkov.yaml`, soft-fail mode — findings don't block the PR).
 
 ## CI/CD
 
-- **`ci.yml`** (PRs to `develop`/`qa`/`main`): runs `mvn verify` + SonarCloud analysis, and a Checkov IaC scan. Quality gate only — no deploys.
-- **`cd.yml`** (push to `develop`/`qa`/`main`, or manual dispatch): maps branch → environment (`develop`→dev, `qa`→qa, `main`→prod), conditionally runs Terraform only if `iac/**` changed (or on manual dispatch), then builds/pushes the Docker image to ECR and updates the ECS service. `deploy` depends on `terraform` so infra changes land before the new image ships. The ECS service has `ignore_changes=[task_definition]`, so a later `terraform apply` won't roll back the deployed image.
+- **`ci.yml`** (PRs to `develop`/`main`): runs `mvn verify` + SonarCloud analysis, and a Checkov IaC scan. Quality gate only — no deploys.
+- **`cd.yml`** (push to `develop`/`main`, or manual dispatch): maps branch → environment (`develop`→dev, `main`→prod), runs `activar` (starts RDS and scales ECS to 1 — see "Service window" above), conditionally runs Terraform only if `iac/**` changed (or on manual dispatch), then builds/pushes the Docker image to ECR and updates the ECS service. `deploy` depends on `terraform` so infra changes land before the new image ships. The ECS service has `ignore_changes=[task_definition]`, so a later `terraform apply` won't roll back the deployed image.
 - **Deploy failures roll back automatically.** The service enables `deployment_circuit_breaker` with `rollback = true`: an image that can't start (3 failed task launches, or containers the `HEALTHCHECK` marks unhealthy) aborts the deployment and restores the previous revision. Because the CD action only waits on the `servicesStable` waiter — and a rolled-back service *is* stable — the workflow has an explicit "verificar que no hubo rollback" step comparing the `PRIMARY` deployment's task definition against the one just registered. Without it a failed deploy would report success. Keep that step if you change the deploy action.
 - DB/MQ passwords are never passed through GitHub Actions as plain secrets into the app — Terraform writes them to SSM Parameter Store (`SecureString`) from `terraform.tfvars`, and the ECS task definition reads them via `secrets`/`valueFrom`.
 

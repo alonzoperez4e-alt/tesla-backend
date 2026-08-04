@@ -23,9 +23,6 @@ variable "environments" {
     "dev" = {
       github_branch = "develop"
     }
-    "qa" = {
-      github_branch = "qa"
-    }
     "prod" = {
       github_branch = "main"
     }

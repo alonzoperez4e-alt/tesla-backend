@@ -1,0 +1,32 @@
+// Generado desde service-hours.js.tftpl por templatefile(): las horas las inyecta
+// Terraform para que no se desincronicen del modulo scheduler, que es quien apaga
+// y enciende de verdad ECS y RDS. Esta funcion solo evita que el visitante reciba
+// el error generico de API Gateway cuando no hay tareas registradas en Cloud Map.
+//
+// Runtime cloudfront-js-2.0: Date queda congelado al instante en que arranca la
+// ejecucion, que es justo lo que necesitamos. Los edges corren en UTC y Peru es
+// UTC-5 fijo (sin horario de verano), de ahi el +19 modulo 24.
+function handler(event) {
+    var horaLima = (new Date().getUTCHours() + 19) % 24;
+    var abierto = horaLima >= ${hora_apertura} && horaLima < ${hora_cierre};
+
+    if (abierto) {
+        return event.request;
+    }
+
+    return {
+        statusCode: 503,
+        statusDescription: 'Service Unavailable',
+        headers: {
+            'content-type': { value: 'application/json' },
+            'cache-control': { value: 'no-store' },
+            // Sin este header el navegador reporta un fallo de CORS y el frontend
+            // no llega a leer el cuerpo de la respuesta.
+            'access-control-allow-origin': { value: '*' },
+            'retry-after': { value: '3600' }
+        },
+        // Mismo contrato que ErrorResponse para que el frontend lo trate como
+        // cualquier otro error de la API.
+        body: '{"error":"SERVICIO_FUERA_DE_HORARIO","message":"El servicio esta disponible de ${hora_apertura}:00 a ${hora_cierre}:00 (hora de Peru)."}'
+    };
+}

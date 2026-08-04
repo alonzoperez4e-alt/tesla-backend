@@ -52,6 +52,25 @@ resource "aws_cloudfront_function" "spa_router" {
   code    = file("${path.module}/functions/spa-router.js")
 }
 
+# Fuera de la ventana de servicio no hay tareas ECS registradas en Cloud Map y API
+# Gateway devolveria un error generico indistinguible de una caida. Esta funcion
+# corta la peticion en el borde con un 503 explicito.
+#
+# Requiere el runtime 2.0: es el que soporta el objeto Date completo. La funcion
+# spa_router se queda en 1.0, que le basta.
+resource "aws_cloudfront_function" "service_hours" {
+  count = var.ventana_habilitada ? 1 : 0
+
+  name    = "${var.project_name}-${var.environment}-service-hours"
+  runtime = "cloudfront-js-2.0"
+  comment = "Responde 503 en /api/* fuera de la ventana de servicio"
+  publish = true
+  code = templatefile("${path.module}/functions/service-hours.js.tftpl", {
+    hora_apertura = var.hora_apertura
+    hora_cierre   = var.hora_cierre == 0 ? 24 : var.hora_cierre
+  })
+}
+
 resource "aws_s3_bucket" "cf_logs" {
   bucket        = "${var.project_name}-cf-logs-${var.environment}"
   force_destroy = var.environment != "prod" ? true : false
@@ -137,6 +156,15 @@ resource "aws_cloudfront_distribution" "cdn" {
     # CachingDisabled: las respuestas del API no se cachean en el borde.
     cache_policy_id          = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
     origin_request_policy_id = aws_cloudfront_origin_request_policy.api_policy.id
+
+    dynamic "function_association" {
+      for_each = aws_cloudfront_function.service_hours
+
+      content {
+        event_type   = "viewer-request"
+        function_arn = function_association.value.arn
+      }
+    }
   }
 
   # No hay behavior /ws-chat/*: API Gateway HTTP API no hace proxy de upgrades
