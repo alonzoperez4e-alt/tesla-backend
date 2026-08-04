@@ -126,3 +126,43 @@ Para que GitHub Actions funcione, configura lo siguiente en **Settings > Secrets
 2. `ci.yml` corre tests + cobertura, SonarCloud y Checkov. El PR solo puede mergearse si el gate pasa.
 3. Al mergear a `develop`, `deploy-dev.yml` construye el `.jar` y publica la imagen Docker en Amazon ECR usando el `Dockerfile` optimizado.
 4. Se inyecta la nueva imagen en la definición de tarea de ECS (con los secretos resueltos desde SSM) y se reinician los contenedores Fargate automáticamente sin tiempo de inactividad (Zero Downtime).
+
+## Ventana de disponibilidad (18:00 - 24:00, hora de Perú)
+
+El backend **no está encendido las 24 horas**. Para recortar el coste horario, cuatro
+programaciones de EventBridge Scheduler (`iac/modules/scheduler/`) apagan y encienden los
+dos únicos recursos que facturan por hora:
+
+| Hora de Lima | Acción                                          |
+| ------------ | ----------------------------------------------- |
+| 17:40        | Arranca la instancia RDS                        |
+| 18:00        | El servicio ECS pasa a 1 tarea                  |
+| 00:00        | El servicio ECS vuelve a 0 tareas               |
+| 00:10        | Se detiene la instancia RDS                     |
+
+Fuera de esa franja, CloudFront responde **503** en `/api/*` con un JSON explicativo en
+lugar del error genérico de API Gateway.
+
+**Levantar el entorno a mano** (por ejemplo para depurar de madrugada). El cierre
+programado de esa misma noche lo devolverá a 0, no hace falta apagarlo:
+
+```bash
+ENTORNO=dev  # dev | qa | prod
+
+aws rds start-db-instance --db-instance-identifier "tesla-backend-$ENTORNO-db"
+aws rds wait db-instance-available --db-instance-identifier "tesla-backend-$ENTORNO-db"
+
+aws ecs update-service \
+  --cluster "tesla-backend-$ENTORNO-cluster" \
+  --service "tesla-backend-$ENTORNO-service" \
+  --desired-count 1
+```
+
+El pipeline de CD hace exactamente esto en su primer job (`activar`), así que **no hace
+falta encender nada antes de desplegar**.
+
+**Volver a 24 horas** sin destruir las programaciones: `ventana_habilitada = false` en el
+`terraform.tfvars` del entorno (las deja en estado `DISABLED` y quita el 503 del borde).
+Si en cambio se quiere **cambiar el horario**, hay que mover con él dos cosas que dependen
+de la franja: las ventanas de backup/mantenimiento de RDS (`iac/modules/database/bd.tf`) y
+el cron del snapshot semanal (`app.ranking.snapshot.cron`).

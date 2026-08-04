@@ -6,3 +6,10 @@ allowed_callback_urls = ["http://localhost:5173"]
 db_username = "tesla_backend_user"
 db_password = ""
 origin_secret_token = ""
+
+# Ventana de disponibilidad (hora de Lima). Todas tienen default, descomenta solo
+# para cambiar la franja o volver a 24h. Si mueves la franja hay que mover con ella
+# las ventanas de backup de RDS y el cron de app.ranking.snapshot.cron.
+# ventana_hora_apertura = 18
+# ventana_hora_cierre   = 0     # 0 equivale a las 24:00
+# ventana_habilitada    = true  # false = disponible 24h, schedules en DISABLED
