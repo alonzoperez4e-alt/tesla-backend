@@ -30,10 +30,9 @@ on:
           - plan
           - apply
 
-# Permiso base de solo lectura; el id-token: write se otorga por job
-# (solo terraform y deploy lo necesitan para OIDC).
-permissions:
-  contents: read
+# Los permisos se declaran job por job, no aqui: un bloque a nivel de workflow se
+# aplica tambien a los jobs que no lo necesitan. activar, terraform y deploy suman
+# id-token: write para el OIDC con AWS.
 
 # Serializa por entorno; dev y prod no se bloquean entre si.
 concurrency:
@@ -44,6 +43,8 @@ jobs:
   setup:
     name: Resolver entorno y cambios
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       env: ${{ steps.map.outputs.env }}
       iac_changed: ${{ steps.detect.outputs.iac_changed }}
