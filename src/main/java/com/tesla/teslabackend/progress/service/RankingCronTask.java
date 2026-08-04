@@ -30,7 +30,19 @@ public class RankingCronTask {
     @Autowired private HistorialRankingRepository historialRepository;
     @Autowired private IntentoRepository intentoRepository;
 
-    @Scheduled(cron = "0 0 0 * * MON", zone = "America/Lima")
+    /**
+     * Materializa el ranking de la semana que acaba de cerrar.
+     *
+     * <p>Corre los lunes a las 18:05 y no a medianoche porque el servicio solo esta
+     * encendido entre las 18:00 y las 24:00 (ver la ventana de disponibilidad en
+     * CLAUDE.md): a las 00:00 la tarea ECS ya esta apagada y el snapshot se perderia.
+     * La ventana que calcula el metodo no depende de la hora del dia —usa
+     * {@code previousOrSame(MONDAY).atStartOfDay()}—, asi que ejecutarlo en cualquier
+     * momento del lunes produce exactamente el mismo intervalo.
+     *
+     * <p>Si se cambia la franja horaria hay que mover tambien este cron dentro de ella.
+     */
+    @Scheduled(cron = "${app.ranking.snapshot.cron:0 5 18 * * MON}", zone = "America/Lima")
     @Transactional
     public void materializarSnapshotSemanal() {
         try {
